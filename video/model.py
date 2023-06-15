@@ -167,11 +167,11 @@ def predict(file_name, run_path):
 
         k += 1
         prev_time = current_time_min
-        cv2.imshow("Emotion Detector", frame)
-        if cv2.waitKey(1) == 13:  # 13 is the Enter Key
-            break
+        # cv2.imshow("Emotion Detector", frame)
+        # if cv2.waitKey(1) == 13:  # 13 is the Enter Key
+        #     break
 
-    with open(run_path + 'filtered_frames.json', 'w') as fp:
+    with open(run_path + 'filtered_frames.json', 'w', encoding="utf-8") as fp:
         json_str = json.dumps(toJSON, indent=4) + '\n'
         fp.write(json_str)
 
@@ -185,6 +185,10 @@ def predict(file_name, run_path):
     print("End Of Program")
 
     print(df.head(10))
+
+    # df['age'] to int
+    df['age'] = df['age'].astype(int)
+    df['age_classes'] = df['age'].apply(lambda x: 0 if x < 20 else (1 if x < 30 else (2 if x < 40 else 3)))
 
     # save to csv
     df.to_csv(run_path + "filtered_frames.csv", index=False)

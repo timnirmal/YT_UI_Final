@@ -1,341 +1,139 @@
-import os
+import pickle
 
 import numpy as np
 import pandas as pd
-from joblib import dump, load
-from sklearn import ensemble
-from sklearn import linear_model
-from sklearn import svm
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.linear_model import SGDClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
+from gensim.models import word2vec
+from keras.layers import Dense, Dropout
+from keras.layers import Embedding
+from keras.layers import LSTM
+from keras.models import Sequential
+from keras.utils import pad_sequences
+from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.pipeline import Pipeline
-from tensorflow.keras.layers import *
+from sklearn.preprocessing import LabelEncoder
 
-# from classes.plot_graphs import GraphPlotter
-
-# show all columns
-pd.set_option('display.max_columns', None)
+# set seed for reproducibility
 np.random.seed(42)
 
-model_path = "models/classes/"
+data = pd.read_csv('classes_dataset_cleaned.csv')  # Replace with your actual file path
 
-tags = ['0', '1', '2', '3', '4', '5']
+# label encoder
+label_encoder = LabelEncoder()
+data['class'] = label_encoder.fit_transform(data['class'])
 
+texts = data['filtered_sentence'].tolist()
+labels = data['class'].tolist()
 
-################################################## Multinomial Naive Bayes model
+# Tokenize the text into sentences and words
+sentences = [text.split() for text in texts]
 
-# NB
-def nb_train(X_train, X_test, y_train, y_test):
-    nb = Pipeline([('vect', CountVectorizer()),
-                   ('tfidf', TfidfTransformer()),
-                   ('clf', MultinomialNB())])
-    nb.fit(X_train, y_train)
-    y_pred = nb.predict(X_test)
-    accuracy = accuracy_score(y_pred, y_test)
-    # print('Accuracy: %s' % accuracy)  # test_size=0.1, random_state=42 - Multinomial Naive Bayes model
-    report = classification_report(y_test, y_pred, target_names=tags)
-    # print(report)
-    return nb, accuracy, report
+# Preprocessing
+embedding_dim = 300
+max_length = 20
+trunc_type = 'post'
+padding_type = 'post'
 
+# load word2vec model
+word2vec_model = word2vec.Word2Vec.load("embedding/word2vec_300.w2v")
 
-# KNN
-def knn_train(X_train, X_test, y_train, y_test):
-    knn = Pipeline([('vect', CountVectorizer()),
-                    ('tfidf', TfidfTransformer()),
-                    ('clf', KNeighborsClassifier(n_neighbors=17, p=6, metric='euclidean'))])
-    knn.fit(X_train, y_train)
-    y_pred = knn.predict(X_test)
-    accuracy = accuracy_score(y_pred, y_test)
-    # print('Accuracy: %s' % accuracy)  # test_size=0.1, random_state=42 - Multinomial Naive Bayes model
-    report = classification_report(y_test, y_pred, target_names=tags)
-    # print(report)
-    return knn, accuracy, report
+# Convert sentences to sequences of word indices
+word_indices = []
+for sentence in sentences:
+    indices = []
+    for word in sentence:
+        if word in word2vec_model.wv.key_to_index:
+            indices.append(word2vec_model.wv.key_to_index[word])
 
+    word_indices.append(indices)
 
-# RF
-def RF_train(X_train, X_test, y_train, y_test):
-    nb = Pipeline([('vect', CountVectorizer()),
-                   ('tfidf', TfidfTransformer()),
-                   ('clf', ensemble.RandomForestClassifier())])
-    nb.fit(X_train, y_train)
-    y_pred = nb.predict(X_test)
-    accuracy = accuracy_score(y_pred, y_test)
-    # print('Accuracy: %s' % accuracy)  # test_size=0.1, random_state=42 - Multinomial Naive Bayes model
-    report = classification_report(y_test, y_pred, target_names=tags)
-    # print(report)
-    return nb, accuracy, report
+# Pad sequences to ensure consistent length
+padded_sequences = pad_sequences(word_indices, maxlen=max_length, padding=padding_type, truncating=trunc_type)
 
+# get dummy variables
+encoded_labels = pd.get_dummies(labels).values
+print(encoded_labels.shape)
+print(encoded_labels.shape)
+print(encoded_labels.shape)
 
-# LR
-def LR_train(X_train, X_test, y_train, y_test):
-    nb = Pipeline([('vect', CountVectorizer()),
-                   ('tfidf', TfidfTransformer()),
-                   ('clf', linear_model.LogisticRegression())])
-    nb.fit(X_train, y_train)
-    y_pred = nb.predict(X_test)
-    accuracy = accuracy_score(y_pred, y_test)
-    # print('Accuracy: %s' % accuracy)  # test_size=0.1, random_state=42 - Multinomial Naive Bayes model
-    report = classification_report(y_test, y_pred, target_names=tags)
-    # print(report)
-    return nb, accuracy, report
+X_train, X_test, y_train, y_test = train_test_split(padded_sequences, encoded_labels, test_size=0.2, random_state=42)
 
+# save X_train, X_test, y_train, y_test
+pickle.dump(X_train, open('models/X_train.pkl', 'wb'))
+pickle.dump(X_test, open('models/X_test.pkl', 'wb'))
+pickle.dump(y_train, open('models/y_train.pkl', 'wb'))
+pickle.dump(y_test, open('models/y_test.pkl', 'wb'))
 
-# Svm
-def svc_train(X_train, X_test, y_train, y_test):
-    sgd = Pipeline([('vect', CountVectorizer()),
-                    ('tfidf', TfidfTransformer()),
-                    ('clf', svm.SVC()),
-                    ])
-    sgd.fit(X_train, y_train)
-    y_pred = sgd.predict(X_test)
-    accuracy = accuracy_score(y_pred, y_test)
-    # print('Accuracy: %s' % accuracy)  # test_size=0.1, random_state=42 - Multinomial Naive Bayes model
-    report = classification_report(y_test, y_pred, target_names=tags)
-    # print(report)
-    return sgd, accuracy, report
+# labels = 0,1,2,3,4,5
 
+# Define the LSTM model
+model = Sequential()
+model.add(Embedding(len(word2vec_model.wv.key_to_index), embedding_dim, input_length=max_length, trainable=False))
+model.add(Dropout(0.3))
+model.add(LSTM(100, return_sequences=True, dropout=0.3, recurrent_dropout=0.2))
+model.add(LSTM(100))
+model.add(Dense(6, activation='sigmoid'))
+print(model.summary())
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-# SGD
-def svc_train(X_train, X_test, y_train, y_test):
-    sgd = Pipeline([('vect', CountVectorizer()),
-                    ('tfidf', TfidfTransformer()),
-                    ('clf',
-                     SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, random_state=42, max_iter=5, tol=None)),
-                    ])
-    sgd.fit(X_train, y_train)
-    y_pred = sgd.predict(X_test)
-    accuracy = accuracy_score(y_pred, y_test)
-    # print('Accuracy: %s' % accuracy)  # test_size=0.1, random_state=42 - Multinomial Naive Bayes model
-    report = classification_report(y_test, y_pred, target_names=tags)
-    # print(report)
-    return sgd, accuracy, report
+# load
+# X_train = pickle.load(open('models/X_train.pkl', 'rb'))
+# X_test = pickle.load(open('models/X_test.pkl', 'rb'))
+# y_train = pickle.load(open('models/y_train.pkl', 'rb'))
+# y_test = pickle.load(open('models/y_test.pkl', 'rb'))
 
+import os
 
-def sgd_train(X_train, X_test, y_train, y_test):
-    sgd = Pipeline([('vect', CountVectorizer()),
-                    ('tfidf', TfidfTransformer()),
-                    ('clf',
-                     SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, random_state=42, max_iter=5, tol=None)),
-                    ])
-    sgd.fit(X_train, y_train)
-    y_pred = sgd.predict(X_test)
-    accuracy = accuracy_score(y_pred, y_test)
-    # print('Accuracy: %s' % accuracy)  # test_size=0.1, random_state=42 - Multinomial Naive Bayes model
-    report = classification_report(y_test, y_pred, target_names=tags)
-    # print(report)
-    return sgd, accuracy, report
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+# Train the lstm model
+history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=100, batch_size=64, verbose=1)
+model.save_weights('models/lstm_model_weights.h5')
+# model.save('models/lstm_model.h5')
 
-def train(save=True):
-    global best_model_name
-    path = "classes_dataset.csv"
+model_acc = model.evaluate(X_test, y_test, verbose=1)[1]
 
-    # read csv
-    df = pd.read_csv(path, encoding='utf8')
+# save the label encoder
+pickle.dump(label_encoder, open('models/label_encoder.pkl', 'wb'))
 
-    # keep only filtered_sentence, class
-    df = df[['filtered_sentence', 'class']]
+# load the model
+# model = load_model('lstm_model/lstm.h5')
 
-    print(df.head())
+# load the label encoder
+# label_encoder = pickle.load(open('models/label_encoder.pkl', 'rb'))
 
-    # print unique values in Class
-    print(df['class'].unique())
+# classification report
+from sklearn.metrics import classification_report
 
-    # convert Class to numeric   Sports, Religious, Political, Sexual, Education, and Entertainment.
-    class_to_num = {
-        "class": {
-            "Sports": 0,
-            "Religious": 1,
-            "Political": 2,
-            "Sexual": 3,
-            "Education": 4,
-            "Entertainment": 5
-        }
-    }
+y_pred = model.predict(X_test)
+y_pred = np.round(y_pred).astype(int)
+lstm_report = classification_report(y_test, y_pred)
+print(lstm_report)
 
-    df = df.replace(class_to_num)
+# training graph for lstm model
+plt.figure(figsize=(10, 10))
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('LSTM Model Accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.savefig('models/lstm_model_accuracy.png')
+# plt.show()
 
-    df_5 = df[df['class'] == 5]
-    df = df[df['class'] != 5]
-    df = df.append(df_5[:280], ignore_index=True)
-
-    df_4 = df[df['class'] == 4]
-    df = df[df['class'] != 4]
-    df = df.append(df_4[:280], ignore_index=True)
-
-    # shuffle
-    df = df.sample(frac=1).reset_index(drop=True)
-    print(df.head())
-
-    # split into train/test sets
-    sentences = df['filtered_sentence'].values.astype('U')
-    y = df['class']
-
-    X_train, X_test, y_train, y_test = train_test_split(sentences, y, test_size=0.1, random_state=42)
-
-    # print df types
-    print(df.dtypes)
-
-    # Model training
-    nb = nb_train(X_train, X_test, y_train, y_test)
-    knn = knn_train(X_train, X_test, y_train, y_test)
-    RF = RF_train(X_train, X_test, y_train, y_test)
-    LR = LR_train(X_train, X_test, y_train, y_test)
-    svc = svc_train(X_train, X_test, y_train, y_test)
-    sgd = sgd_train(X_train, X_test, y_train, y_test)
-
-    print("Naive Bayes Accuracy: ", nb[1])
-    print("KNN Accuracy: ", knn[1])
-    print("Random Forest Accuracy: ", RF[1])
-    print("Logistic Regression Accuracy: ", LR[1])
-    print("SVC Accuracy: ", svc[1])
-    print("SGD Accuracy: ", sgd[1])
-
-    best_model = None
-    # pick best model and accuracy
-    best_model_accuracy = max(nb[1], knn[1], RF[1], LR[1], svc[1], sgd[1])
-    print("\nBest Model Accuracy: ", best_model_accuracy)
-
-    # best model name
-    if best_model_accuracy == nb[1]:
-        print("Best Model: Naive Bayes")
-        best_model = nb[0]
-        best_model_name = "Naive Bayes"
-    elif best_model_accuracy == knn[1]:
-        print("Best Model: KNN")
-        best_model = knn[0]
-        best_model_name = "KNN"
-    elif best_model_accuracy == RF[1]:
-        print("Best Model: Random Forest")
-        best_model = RF[0]
-        best_model_name = "Random Forest"
-    elif best_model_accuracy == LR[1]:
-        print("Best Model: Logistic Regression")
-        best_model = LR[0]
-        best_model_name = "Logistic Regression"
-    elif best_model_accuracy == svc[1]:
-        print("Best Model: SVC")
-        best_model = svc[0]
-        best_model_name = "SVC"
-    elif best_model_accuracy == sgd[1]:
-        print("Best Model: SGD")
-        best_model = sgd[0]
-        best_model_name = "SGD"
-    else:
-        print("No Best Model")
-
-    # save model
-    if save:
-        try:
-            dump(best_model, open(model_path + "model_classes.pkl", "wb"))
-        except:
-            print("Model not saved, Try adding the full path to the model")
-    print("Model Saved")
-
-    # remove log.txt if exists
-    if os.path.exists("log.txt"):
-        os.remove("log.txt")
-
-    # log.txt
-    with open("log.txt", "a") as f:
-        f.write("Naive Bayes Accuracy: " + str(nb[1]) + "\n")
-        f.write("KNN Accuracy: " + str(knn[1]) + "\n")
-        f.write("Random Forest Accuracy: " + str(RF[1]) + "\n")
-        f.write("Logistic Regression Accuracy: " + str(LR[1]) + "\n")
-        f.write("SVC Accuracy: " + str(svc[1]) + "\n")
-        f.write("SGD Accuracy: " + str(sgd[1]) + "\n")
-        f.write("\n===========================================\n\n")
-        f.write("Best Model Accuracy: " + str(best_model_accuracy) + "\n")
-        f.write("Best Model: " + str(best_model) + "\n")
-        f.write("Best Model Name: " + str(best_model_name) + "\n")
-        f.write("\n===========================================\n\n")
-        f.write("Best Model Classification Report: \n" + str(
-            classification_report(y_test, best_model.predict(X_test), target_names=tags)) + "\n")
-
-    print("Training Completed")
-    print("Model location: ", model_path + "model_classes.pkl")
-
-    y_pred = best_model.predict(X_test)
-
-    # plot graphs
-    graph_plotter = GraphPlotter(X_train, y_train, X_test, y_test, y_pred, best_model, df, save_path="log/")
-
-    graph_plotter.plot_confusion_matrix()
-    graph_plotter.plot_roc_curve()
-    graph_plotter.plot_learning_curve()
-    graph_plotter.plot_feature_importance()
-
-    return best_model_accuracy, best_model
+# training graph for lstm model
+plt.figure(figsize=(10, 10))
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('LSTM Model Loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.savefig('models/lstm_model_loss.png')
+# plt.show()
 
 
-def predict_classes(text, model=None):
-    print([text])
-    if model is None:
-        model = load(open(model_path + "model_classes.pkl", "rb"))
-
-    pred = model.predict([text])
-
-    # convert numeric to class   Sports, Religious, Political, Sexual, Education, and Entertainment.
-    num_to_class = {
-        "class": {
-            0: "Sports",
-            1: "Religious",
-            2: "Political",
-            3: "Sexual",
-            4: "Education",
-            5: "Entertainment"
-        }
-    }
-
-    if pred[0] not in num_to_class["class"]:
-        print("Class not found")
-        return None
-    else:
-        pred = num_to_class["class"][pred[0]]
-        print("Predicted Class: ", pred)
-
-    return pred
-
-
-def processing_audio_classes(df):
-    # predict hate for each unique text and add that to all rows with same text
-
-    # get unique text
-    unique_text = df["text"].unique()
-
-    # predict hate for each unique text
-    for text in unique_text:
-        # get all rows with same text
-        rows = df[df["text"] == text]
-
-        # get first row
-        row = rows.iloc[0]
-
-        # get classes
-        hate = predict_classes(row["text"])
-
-        # add hate to all rows with same text
-        df.loc[df["text"] == text, "classes"] = hate
-
-    return df
-
-# # train model
-# ac, model = train(save=True)
-#
-# # predict
-# text = " අනේ පල හුත්තො තොපේ මහ එකාගෙ දවසක වියඳම කීයද ඒ දවස් වල"
-# predict_classes(text, model)
-
-# text = ["සෑම අන්ඩුවක් අනුගමන කර ප්‍රතපෙරටුගාම සමාජවාද පක්ෂ සංවිධාන කල ජනත දැනු කිර වැඩසටහන දින ගම්පහ නගර ජනතා මුනගැසෙ පක්ෂ ප්‍රධා ලේක කුමාර ගුනරත්න සහෝදර දැක්ව අදහස",
-#         " ප්රංෂ කා සිනම සම්මා උලෙුව දීම ගොස දැඩි අන්දෝලනයක ලක් සිට  ",
-#         " තමන් අනන් වූ සැක්සෆෝ වාෂි වාද ෂිල්පි  වසරේද ග්රැම සංගීත සම්මාන පිද ලැබීම සම විය  "
-#         ]
-#
-# for t in text:
-#     predict_classes(t)
+# create log file
+with open('models/log.txt', 'w') as f:
+    f.write("Best model accuracy: " + str(model_acc) + "\n")
+    f.write("Best model confusion matrix: " + "\n")
+    f.write(lstm_report)

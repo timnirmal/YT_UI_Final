@@ -22,7 +22,7 @@ def translate_en_to_si(text):
     # translate english words to sinhala
     for i in range(len(english_words_list)):
         # if word is english, space, or punctuation
-        pattern = r'[a-zA-Z0-9\s]'
+        pattern = r'[a-zA-Z\s]'
         if re.match(pattern, english_words_list[i]):
             english_words_list[i] = tr.translate(english_words_list[i])
 

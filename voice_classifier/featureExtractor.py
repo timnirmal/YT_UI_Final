@@ -180,6 +180,7 @@ def get_features_chunk(chunks):
         sample_dict = {'nobs': nobs, 'mean': mean, 'skew': skew, 'kurtosis': kurtosis,
                        'median': median, 'mode': mode, 'std': std, 'low': low,
                        'peak': peak, 'q25': q25, 'q75': q75, 'iqr': iqr}
-        df = df.append(sample_dict, ignore_index=True)
+        # concat
+        df = pd.concat([df, pd.DataFrame(sample_dict, index=[0])], ignore_index=True)
 
     return df

@@ -89,49 +89,6 @@ constant_mapping = {
     'f': 'ෆ්',
 }
 
-constant_a_mapping = {
-    'ka': 'ක',
-    'kha': 'ඛ',
-    'ga': 'ග',
-    'gha': 'ඝ',
-    'nga': 'ඞ',
-    'nnga': 'ඟ',
-    'ca': 'ච',
-    'cha': 'ඡ',
-    'ja': 'ජ',
-    'jha': 'ඣ',
-    'nya': 'ඤ',
-    'jnya': 'ඥ',
-    'tta': 'ට',
-    'ttha': 'ඨ',
-    'dda': 'ඩ',
-    'ddha': 'ඪ',
-    'nna': 'ණ',
-    'nndda': 'ඬ',
-    'ta': 'ත',
-    'tha': 'ථ',
-    'da': 'ද',
-    'dha': 'ධ',
-    'na': 'න',
-    'ndda': 'ඳ',
-    'pa': 'ප',
-    'pha': 'ඵ',
-    'ba': 'බ',
-    'bha': 'භ',
-    'ma': 'ම',
-    'mba': 'ඹ',
-    'ya': 'ය',
-    'ra': 'ර',
-    'la': 'ල',
-    'va': 'ව',
-    'wa': 'ව',
-    'sha': 'ශ',
-    'ssa': 'ෂ',
-    'sa': 'ස',
-    'ha': 'හ',
-    'lla': 'ළ',
-    'fa': 'ෆ',
-}
 
 depended_vowl_mapping = {
     'aa': 'ා',
@@ -155,6 +112,7 @@ def convert_to_sinhala(text):
     i = 0
     while i < len(text):
         char = text[i]
+        # print(char)
         if char in vowel_mapping:
             if i + 1 < len(text) and text[i:i + 2] in depended_vowl_mapping:
                 converted_text += depended_vowl_mapping[text[i:i + 2]]
@@ -163,8 +121,8 @@ def convert_to_sinhala(text):
                 converted_text += vowel_mapping[char]
                 i += 1
         elif char in constant_mapping:
-            if i + 1 < len(text) and text[i:i + 2] in constant_a_mapping:
-                converted_text += constant_a_mapping[text[i:i + 2]]
+            if i + 1 < len(text) and text[i:i + 2] in constant_mapping:
+                converted_text += constant_mapping[text[i:i + 2]]
                 i += 2
             else:
                 converted_text += constant_mapping[char]
@@ -186,14 +144,18 @@ def join_to_word(letters):
 def fix_word(word):
     le = separate_to_letters(word)
 
-    # print(le)
-    for i in range(len(le)):
-        if le[i] == '්' and i + 1 < len(le) and le[i + 1] in depended_vowl_mapping.values():
-            le[i] = ''
+    try:
+        # print(le)
+        for i in range(len(le)):
+            if le[i] == '්' and i + 1 < len(le) and le[i + 1] in depended_vowl_mapping.values():
+                le[i] = ''
 
-    # # remove empty elements
-    # le_a = [x for x in le if x != '']
-    # print(le_a)
+        # # remove empty elements
+        # le_a = [x for x in le if x != '']
+        # print(le_a)
+    except Exception as e:
+        print(e)
+        pass
 
     return join_to_word(le)
 
@@ -203,18 +165,65 @@ def fix_first_letter_vowel(word):
 
     # print(le)
 
-    # if first letter is depended_vowl_mapping , replace with coreesponding vowel_mapping
-    if le[0] in depended_vowl_mapping.values():
-        # find le[0] in depended_vowl_mapping.values()
-        for key, value in depended_vowl_mapping.items():
-            if value == le[0]:
-                en_letter = key
-                # print(en_letter)
-                break
+    try:
+        # if first letter is depended_vowl_mapping , replace with coreesponding vowel_mapping
+        if le[0] in depended_vowl_mapping.values():
+            # find le[0] in depended_vowl_mapping.values()
+            for key, value in depended_vowl_mapping.items():
+                if value == le[0]:
+                    en_letter = key
+                    # print(en_letter)
+                    break
 
-        # print(vowel_only_mapping[en_letter])
+            # print(vowel_only_mapping[en_letter])
 
-        le[0] = vowel_only_mapping[en_letter]
+            le[0] = vowel_only_mapping[en_letter]
+    except Exception as e:
+        print(e)
+        pass
+
+    return join_to_word(le)
+
+# def fix_last_letter_vowel(word):
+#     le = separate_to_letters(word)
+#
+#     print(le)
+#
+#     try:
+#         # if first letter is depended_vowl_mapping , replace with coreesponding vowel_mapping
+#         if le[-1] in vowel_only_mapping.values() and le[-2] in vowel_only_mapping.values() and le[-3] in constant_mapping.values():
+#             # find le[0] in depended_vowl_mapping.values()
+#             for key, value in vowel_only_mapping.items():
+#                 if value == le[-1]:
+#                     en_letter = key
+#                     # print(en_letter)
+#                     break
+#
+#             # print(vowel_only_mapping[en_letter])
+#
+#             le[-1] = depended_vowl_mapping[en_letter]
+#
+#     except Exception as e:
+#         print(e)
+#         pass
+#
+#     return join_to_word(le)
+
+def fix_const_plus_a(word):
+    le = separate_to_letters(word)
+    # print(le)
+
+    # if '්', 'අ' found in any place, then remove '්' and 'අ'
+    try:
+        for i in range(len(le)):
+            if le[i] == '්' and i + 1 < len(le) and le[i + 1] == 'අ':
+                le[i] = ''
+                le[i + 1] = ''
+    except Exception as e:
+        print(e)
+        pass
+
+    # print(le)
 
     return join_to_word(le)
 
@@ -223,7 +232,16 @@ def convert_singlish_to_sinhala_text(input_text):
     output_text = ""
 
     for word in input_text.split():
-        output_text += fix_first_letter_vowel(fix_word(convert_to_sinhala(word))) + " "
+        output_text += fix_const_plus_a(fix_first_letter_vowel(fix_word(convert_to_sinhala(word)))) + " "
+        # output_text += fix_last_letter_vowel(fix_first_letter_vowel(fix_word(convert_to_sinhala(word)))) + " "
 
     # print(output_text)
     return output_text
+
+
+# print(convert_singlish_to_sinhala_text("a"))
+# print(convert_singlish_to_sinhala_text("aa"))
+# print(convert_singlish_to_sinhala_text("aaa"))
+# print(convert_singlish_to_sinhala_text("aayuboewan"))
+# print(convert_singlish_to_sinhala_text("naa"))
+# print(convert_singlish_to_sinhala_text("nae nai daayoe"))
