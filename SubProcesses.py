@@ -10,8 +10,8 @@ from audio.process_data import process_data_df
 from audio.process_with_timestamp import process_with_timestamp
 from audio.transcribe_data_gcloud import get_large_audio_transcription
 from audio.video_to_audio import convert_video_to_audio_ffmpeg, wav_to_mono_flac
-from classes.classes_predict import predict_classes_df
-from hate.hate_lstm_predict import predict_hate_df
+# from classes.classes_predict import predict_classes_df
+# from hate.hate_lstm_predict import predict_hate_df
 from lib.sync_av import sync_audio_and_video
 from sentiment.sentiment_word import calculate_sentiment_df
 from video.model import predict
@@ -96,8 +96,8 @@ def SentimentCalculation(hate_df, run_path):
 
 def HatePrediction(audio_df, run_path):
     # hate
-    hate_df = predict_hate_df(audio_df)
-    hate_df.to_csv(run_path + "hate_df.csv", index=False)
+    # hate_df = predict_hate_df(audio_df)
+    # hate_df.to_csv(run_path + "hate_df.csv", index=False)
     hate_df = pd.read_csv(run_path + "hate_df.csv")
     return hate_df
 
@@ -160,8 +160,8 @@ def AgeNGenderEstimation(audio_df, run_path, file_name):
 
 def DomainPrediction(audio_df, run_path):
     # classes
-    audio_df = predict_classes_df(audio_df)
-    audio_df.to_csv(run_path + "recognized_processed_classes.csv", index=False)
+    # audio_df = predict_classes_df(audio_df)
+    # audio_df.to_csv(run_path + "recognized_processed_classes.csv", index=False)
     audio_df = pd.read_csv(run_path + "recognized_processed_classes.csv")
     return audio_df
 

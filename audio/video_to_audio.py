@@ -2,6 +2,8 @@ import os
 import subprocess
 
 from pydub import AudioSegment
+from os import path
+from pydub import AudioSegment
 
 
 def convert_video_to_audio_ffmpeg(video_file, run_folder, file_name, output_ext="wav"):
@@ -10,8 +12,26 @@ def convert_video_to_audio_ffmpeg(video_file, run_folder, file_name, output_ext=
 
     print("Converting video to audio")
     # save file in run_folder
-    subprocess.call(["ffmpeg", "-y", "-i", video_file, f"{run_folder}{file_name}.{output_ext}"],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    # convert mp4 to wav
+    # subprocess.call(
+    #     [
+    #         "ffmpeg",
+    #         "-i",
+    #         video_file,
+    #         "-ab",
+    #         "160k",
+    #         "-ac",
+    #         "2",
+    #         "-ar",
+    #         "44100",
+    #         "-vn",
+    #         f"{run_folder}{file_name}.{output_ext}",
+    #     ]
+    # )
+
+    # convert mp4 to wav
+    sound = AudioSegment.from_file(run_folder + file_name + ".mp4")
+    sound.export(f"{run_folder}{file_name}.{output_ext}", format=output_ext)
 
     # check if file exists
     if not os.path.exists(f"{run_folder}{file_name}.{output_ext}"):

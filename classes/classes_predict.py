@@ -6,6 +6,7 @@ from keras.layers import Dense, Dropout
 from keras.layers import LSTM
 from keras.layers import Embedding
 from keras.utils import pad_sequences
+from w2v import word2vec_model
 
 data_path = 'classes/models/'
 w2v_path = 'classes/embedding/'
@@ -13,7 +14,7 @@ w2v_path = 'classes/embedding/'
 with open(data_path + 'label_encoder.pkl', 'rb') as file:
     label_encoder = pickle.load(file)
 
-word2vec_model = word2vec.Word2Vec.load(w2v_path + "word2vec_300.w2v")
+# word2vec_model = word2vec.Word2Vec.load(w2v_path + "word2vec_300.w2v")
 
 # Preprocessing
 embedding_dim = 300
