@@ -4,6 +4,7 @@ import dlib
 import sys
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 
 from lib.wide_resnet import WideResNet
 from keras.utils.data_utils import get_file
@@ -45,7 +46,7 @@ def predict(file_name, run_path):
     detector = dlib.get_frontal_face_detector()
 
     # Initialize Webcam
-    cap = cv2.VideoCapture(file_name)
+    cap = cv2.VideoCapture(run_path + file_name)
     fourcc = cv2.VideoWriter_fourcc(*'DIVX')
     out = cv2.VideoWriter(run_path + 'output_video.mp4', fourcc, 20.0, (int(cap.get(3)), int(cap.get(4))))
     k = 0
@@ -90,7 +91,7 @@ def predict(file_name, run_path):
         # current time in minutes
         # current_time_min = current_time_sec / 60
         current_time_min = current_time_sec
-        print("*"*50)
+        print("*" * 50)
         print("Current time in minutes: {0}".format(current_time_min))
         print("Previous time in minutes: {0}".format(prev_time))
         print("Current frame is: {0}".format(currentFrame))
@@ -150,15 +151,15 @@ def predict(file_name, run_path):
 
             print(k)
             print(values)
-            print("-"*150)
+            print("-" * 150)
             # for each list in values(list) append to df
             for i in range(len(values)):
-                df = pd.concat([df, pd.DataFrame([[k, prev_time, current_time_min, values[i][0], values[i][1], values[i][2]]], columns=["frame", "start_time", "end_time", "age", "gen", "emotion"])], ignore_index=True)
+                df = pd.concat([df, pd.DataFrame(
+                    [[k, prev_time, current_time_min, values[i][0], values[i][1], values[i][2]]],
+                    columns=["frame", "start_time", "end_time", "age", "gen", "emotion"])], ignore_index=True)
 
             # # concat to df
             # df = pd.concat([df, pd.DataFrame([[k, prev_time, current_time_min, values[0][0], values[0][1], values[0][2]]], columns=["frame", "start_time", "end_time", "age", "gen", "emotion"])], ignore_index=True)
-
-
 
             frames_dict[k] = values
             key = f"Frame:{k}"
@@ -192,5 +193,61 @@ def predict(file_name, run_path):
 
     # save to csv
     df.to_csv(run_path + "filtered_frames.csv", index=False)
+
+    if not df.empty:
+        df['age'] = df['age'].astype(int)
+        df.plot(y='age', figsize=(25, 10), title='Age vs Frames', ylabel='age')
+        # save to png
+        plt.savefig(run_path + "Age vs Frames.png")
+
+        dict_emo = df.set_index('frame').to_dict()['emotion']
+        x = np.array(list(zip(*dict_emo.items())))
+        u, ind = np.unique(x[1, :], return_inverse=True)
+        x[1, :] = ind
+        x = x.astype(int).T
+
+        plt.figure(figsize=(20, 5))
+        # plot the two columns of the array
+        plt.plot(x[:, 0], x[:, 1])
+        # set the labels accordinly
+        plt.gca().set_yticks(range(len(u)))
+        plt.title("Variation of Emotions in Frames")
+        plt.xlabel("frame")
+        plt.ylabel("emotion")
+        plt.gca().set_yticklabels(['Angry', 'Fear', 'Happy', 'Neutral', 'Sad'])
+        plt.tick_params(labelsize=10)
+        plt.show()
+        plt.savefig(run_path + "Variation of Emotions in Frames.png")
+    else:
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
+        print("No faces detected in the video")
 
     return frames_dict

@@ -1,4 +1,8 @@
+import codecs
+import csv
+import glob
 import os
+import subprocess
 import tkinter as tk
 from datetime import datetime
 from time import sleep
@@ -7,13 +11,16 @@ from tkinter import filedialog
 
 import cv2
 import numpy as np
+import pandas as pd
 from PIL import Image, ImageTk
 from keras.utils import img_to_array
 from pytube import YouTube
+import yt_dlp
+import threading
 
-from SubProcesses import video_sentiment, AudioSentiment, Merging, VideoPrediction, SentimentCalculation, \
+from SubProcesses import video_severity, audio_severity, Merging, VideoPrediction, SentimentCalculation, \
     HatePrediction, \
-    AgeNGenderEstimation, DomainPrediction, TranscribingNProcessing, AudioConversion, MergedSentiment, create_folder
+    AgeNGenderEstimation, DomainPrediction, TranscribingNProcessing, AudioConversion, merged_severity, create_folder
 
 # from lib import predict
 
@@ -53,21 +60,53 @@ def pickImage():
 
 
 def Download(link):
-    youtubeObject = YouTube(link, use_oauth=True, allow_oauth_cache=True)
-    youtubeObject = youtubeObject.streams.get_highest_resolution()
+    # youtubeObject = YouTube(link, use_oauth=True, allow_oauth_cache=True)
+    # youtubeObject = youtubeObject.streams.get_highest_resolution()
+
+    ydl_opts = {
+        'format': 'best',
+        'outtmpl': '%(title)s.%(ext)s',
+    }
+
+    file_name = yt_dlp.YoutubeDL(ydl_opts) \
+        .prepare_filename(yt_dlp.YoutubeDL(ydl_opts).extract_info(link, download=False))
+    print(file_name)
 
     # create a folder inside runs folder if not exists if not exists print "file exists"
-    run_number = create_folder("runs/", youtubeObject.default_filename)
+    run_number = create_folder("runs/", file_name)
     # run_number = 3
     run_path = "runs/run_" + str(run_number) + "/"
 
     try:
-        youtubeObject.download(output_path=run_path)
+        # youtubeObject.download(output_path=run_path)
+        ydl_opts = {
+            'format': 'best',
+            'outtmpl': run_path + '%(title)s.%(ext)s',
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([link])
+
+        print("downloaded", link)
     except:
         print("An error has occurred")
     print("Download is completed successfully")
 
-    return run_path, youtubeObject.default_filename, run_number
+
+    # get the .mp4 file in the runs folder
+    run_path_file = glob.glob(run_path + "*.mp4")[0]
+    print("run_path_file: ", run_path_file)
+    # get the file name
+    run_path_file = run_path_file.split("\\")[-1]
+
+    # compare the file name with the file name in the runs folder
+    if run_path_file == file_name:
+        print("file name is same")
+    else:
+        print("file name is not same")
+        file_name = run_path_file
+
+
+    return run_path, file_name, run_number
 
 
 def toggle_single_item(index):
@@ -84,92 +123,231 @@ def toggle_single_item(index):
 
 def showImage():
     url = url_text.get()
-
     # download the video
     if url.startswith("https://www.youtube.com/watch?v="):
         run_path, file_name, run_number = Download(url)
     else:
-        print("Not a youtube link")
+        print("Not a YouTube link")
 
-    # run_number = 7
-    # file_name = "People X Nainowale Ne  Chillout Mashup  @YashrajMukhateOfficial   MEHER.mp4"
-    # run_path = "runs/run_6/"
+    toggle_single_item(0)
 
-    print("run_path: ", run_path)
-    print("file_name: ", file_name)
+    # # run_number = 7
+    # # file_name = "People X Nainowale Ne  Chillout Mashup  @YashrajMukhateOfficial   MEHER.mp4"
+    # # run_path = "runs/run_6/"
+    #
+    # print("run_path: ", run_path)
+    # print("file_name: ", file_name)
+    #
+    # AudioConversion(file_name, run_path, file_name)
+    # toggle_single_item(1)
+    #
+    # audio_df = TranscribingNProcessing(file_name, run_number, run_path)
+    # toggle_single_item(2)
+    #
+    # sleep(50)
+    # print("sleeping for 50 seconds")
+    # print("sleeping for 50 seconds")
+    # print("sleeping for 50 seconds")
+    # print("sleeping for 50 seconds")
+    # print("sleeping for 50 seconds")
+    # print("sleeping for 50 seconds")
+    # print("sleeping for 50 seconds")
+    # print("sleeping for 50 seconds")
+    # print("sleeping for 50 seconds")
+    # print("sleeping for 50 seconds")
+    #
+    # audio_df = DomainPrediction(audio_df, run_path)
+    # toggle_single_item(3)
+    #
+    # audio_df = AgeNGenderEstimation(audio_df, run_path, file_name)
+    # toggle_single_item(4)
+    #
+    # hate_df = HatePrediction(audio_df, run_path)
+    # toggle_single_item(5)
+    #
+    # word_sentiment_df = SentimentCalculation(hate_df, run_path)
+    # toggle_single_item(6)
 
-    AudioConversion(file_name, run_path, file_name)
+    print(run_path)
+    print(file_name)
+    video_df = VideoPrediction(run_path, file_name)
 
-    audio_df = TranscribingNProcessing(file_name, run_number, run_path)
-    #
-    #
-    # # if the image is less than 120x120, resize it
-    # image = cv2.imread(file)
-    # height, width, channels = image.shape
-    #
-    # global scaled_image
-    #
-    # """LOAD IMAGE"""
-    # # if the image is 256x256
-    # if height == 256 and width == 256:
-    #     # show the image in the gui
-    #     image1 = Image.open(file)
-    #     image1 = image1.resize((256, 256), Image.ANTIALIAS)
-    #     img = ImageTk.PhotoImage(image1)
-    #     label = Label(middle, image=img, bg='red')
-    #     label.image = img
-    #     label.place(x=80, y=100)
-    #
-    #     image_read = cv2.imread(file)
-    #     image_read = cv2.resize(image_read, (256, 256))
-    #     image_read = img_to_array(image_read)
-    #     image_read = np.expand_dims(image_read, axis=0)
-    #     image_read = image_read / 255.0
-    #
-    # predict_result, result_text = predict.predict(image_read, model=model_choice.get())
-    #
-    # # get list of images in result folder
-    # result_folder = os.path.join(currentPath, "result")
-    # result_images = os.listdir(result_folder)
-    #
-    # # show the result_images in the gui one by one with a 1 second delay
-    # for i in range(len(result_images)):
-    #     # show the image in the gui
-    #     image1 = Image.open(os.path.join(result_folder, result_images[i]))
-    #     # resize keeping aspect ratio
-    #     image_sizes = image1.size
-    #     SIZE = 400
-    #     if image_sizes[0] > SIZE:
-    #         image1 = image1.resize((SIZE, int(image_sizes[1] * SIZE / image_sizes[0])), Image.ANTIALIAS)
-    #     img = ImageTk.PhotoImage(image1)
-    #     label = Label(middle, image=img, bg='red')
-    #     label.image = img
-    #     label.place(x=400, y=100)
-    #
-    #     # sleep for 500 millisecond
-    #     tksleep(500)
-    #
-    # result_text_var.set(result_text)
-    # predicted_var.set(predict_result)
-    #
-    # # show the result in the gui after prediction
-    # result = Label(middle, text=result_text_var.get(), font=("Arial", 10), bg='white')
-    # result.place(x=1000, y=100)
-    #
-    # # text for prediction
-    # predict_val = predicted_var.get()
-    # # remove [ and ] from the string by replacing them with empty string
-    # predict_val = predict_val.replace("[", "")
-    # predict_val = predict_val.replace("]", "")
-    # predicted = Label(middle, text=predict_val, font=("Arial", 10), bg='white')
-    # predicted.place(x=1000, y=150)
-    #
-    # # text for prediction
-    # # find model name by value
-    # model = Label(middle, text=list(model_set.keys())[list(model_set.values()).index(model_choice.get())],
-    #               font=("Arial", 10), bg='white')
-    # model.place(x=1000, y=200)
+    # is run_path + file_name exists
+    if os.path.exists(run_path + file_name):
+        # show video in player
+        video = os.startfile(run_path + file_name)
+        # read the video
+        cap = cv2.VideoCapture(run_path + file_name)
+        # get the frame count
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        print("frame_count: ", frame_count)
+    else:
+        print("file not exists")
+        print("file not exists")
+        print("file not exists")
 
+    if not video_df.empty:
+        # show image in left side of the content
+        img = ImageTk.PhotoImage(Image.open(run_path + "Age vs Frames.png"))
+        panel = tk.Label(left_subframe, image=img)
+        panel.pack(side="bottom", fill="both", expand="yes")
+
+        # show image in left side of the content
+        img = ImageTk.PhotoImage(Image.open(run_path + "Age vs Frames.png"))
+        panel = tk.Label(left_subframe, image=img)
+        panel.pack(side="bottom", fill="both", expand="yes")
+
+    toggle_single_item(7)
+
+    # print(audio_df.head())
+    # print(video_df.head())
+    #
+    # merged_df = Merging(file_name, run_path, video_df, word_sentiment_df)
+    # toggle_single_item(8)
+    #
+    # if not word_sentiment_df.empty:
+    #     audio_severity_done = audio_severity(run_path, word_sentiment_df)
+    #     if audio_severity_done:
+    #         toggle_single_item(9)
+    # else:
+    #     print("audio severity not done")
+    #     audio_severity_done = False
+    #
+    #
+    # if not video_df.empty:
+    #     video_severity_done = video_severity(run_path, video_df)
+    #     if video_severity_done:
+    #         toggle_single_item(10)
+    # else:
+    #     print("video severity not done")
+    #     video_severity_done = False
+    #
+    # if not merged_df.empty:
+    #     merged_severity_done = merged_severity(run_path, merged_df)
+    #     if merged_severity_done:
+    #         toggle_single_item(11)
+    # else:
+    #     print("merged severity not done")
+    #     merged_severity_done = False
+    #
+    #
+    # ##################################### Finalizing #####################################
+    # if audio_severity_done:
+    #     audio_df = pd.read_csv(run_path + "audio_predicted.csv")[['hate', 'severity']]
+    #     print("Mean of the audio hate: ", np.mean(audio_df['hate']), " - ", np.round(np.mean(audio_df['hate']) * 100, 2),
+    #           "%")
+    #     print("Mean of the audio severity: ", np.mean(audio_df['severity']), " - ",
+    #           np.round(np.mean(audio_df['severity']) * 25, 2), "%")
+    #     audio_hate_mean = np.round(np.mean(audio_df['hate']) * 100, 2)
+    #     audio_severity_mean = np.round(np.mean(audio_df['severity']) * 25, 2)
+    # else:
+    #     audio_hate_mean = "NaN"
+    #     audio_severity_mean = "NaN"
+    #
+    # if video_severity_done:
+    #     video_df = pd.read_csv(run_path + "video_predicted.csv")[['severity']]
+    #     print("Mean of the video severity: ", np.mean(video_df['severity']), " - ",
+    #           np.round(np.mean(video_df['severity']) * 25, 2), "%")
+    #     video_severity_mean = np.round(np.mean(video_df['severity']) * 25, 2)
+    # else:
+    #     video_severity_mean = "NaN"
+    #
+    #
+    # if audio_severity_done and video_severity_done and merged_severity_done:
+    #     merged_df = pd.read_csv(run_path + "merged_predicted.csv")[['hate', 'severity']]
+    #     print("Mean of the merged severity: ", np.mean(merged_df['severity']), " - ",
+    #           np.round(np.mean(merged_df['severity']) * 25, 2), "%")
+    #     merged_severity_mean = np.round(np.mean(merged_df['severity']) * 25, 2)
+    # else:
+    #     merged_severity_mean = "NaN"
+    #
+    # # create new fram below content frame
+    #
+    #
+    # # audio_hate_mean_label = Label(bottom_frame, text=audio_hate_mean)
+    # # audio_hate_mean_label.grid(row=1, column=1)
+    # #
+    # # audio_severity_mean_label = Label(bottom_frame, text=audio_severity_mean)
+    # # audio_severity_mean_label.grid(row=2, column=1)
+    # #
+    # # video_severity_mean_label = Label(bottom_frame, text=video_severity_mean)
+    # # video_severity_mean_label.grid(row=3, column=1)
+    # #
+    # # merged_severity_mean_label = Label(bottom_frame, text=merged_severity_mean)
+    # # merged_severity_mean_label.grid(row=4, column=1)
+    #
+    # bottom_frame_column_gap = 40
+    # bottom_frame_title_font_size = 12
+    # bottom_frame_title_font = ("Arial Bold", bottom_frame_title_font_size)
+    # bottom_frame_title_bg = 'white'
+    # bottom_frame_title_fg = 'black'
+    # bottom_frame_value_font_size = 12
+    # bottom_frame_value_font = ("Arial Bold", bottom_frame_value_font_size)
+    # bottom_frame_value_bg = 'white'
+    # bottom_frame_value_fg = 'black'
+    #
+    # audio_hate_mean_label = Label(bottom_frame, text="Audio Hate Mean", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    # audio_hate_mean_label.grid(row=0, column=0, padx=bottom_frame_column_gap)
+    # audio_hate_mean_title = Label(bottom_frame, text=audio_hate_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    # audio_hate_mean_title.grid(row=1, column=0, padx=bottom_frame_column_gap)
+    #
+    # audio_severity_mean_label_title = Label(bottom_frame, text="Audio Severity Mean", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    # audio_severity_mean_label_title.grid(row=0, column=1, padx=bottom_frame_column_gap)
+    # audio_severity_mean_label = Label(bottom_frame, text=audio_severity_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    # audio_severity_mean_label.grid(row=1, column=1, padx=bottom_frame_column_gap)
+    #
+    # video_hate_mean_label_title = Label(bottom_frame, text="Video Hate Mean", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    # video_hate_mean_label_title.grid(row=0, column=2, padx=bottom_frame_column_gap)
+    # video_hate_mean_label = Label(bottom_frame, text="NaN", font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    # video_hate_mean_label.grid(row=1, column=2, padx=bottom_frame_column_gap)
+    #
+    # video_severity_mean_label_title = Label(bottom_frame, text="Video Severity Mean", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    # video_severity_mean_label_title.grid(row=0, column=3, padx=bottom_frame_column_gap)
+    # merged_severity_mean_label = Label(bottom_frame, text=video_severity_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    # merged_severity_mean_label.grid(row=1, column=3, padx=bottom_frame_column_gap)
+    #
+    #
+    # def download_audio_csv():
+    #     # Open the CSV file with UTF-8 encoding
+    #     csv_file_path = (run_path + "recognized_processed_classes_features_age_gen.csv")
+    #     open_csv_files(csv_file_path)
+    #
+    # def download_video_csv():
+    #     csv_file_path = (run_path + "filtered_frames.csv")
+    #     open_csv_files(csv_file_path)
+    #
+    # def download_hate_sentiment_csv():
+    #     csv_file_path = (run_path + "word_sentiment_df.csv")
+    #     open_csv_files(csv_file_path)
+    #
+    # def download_merged_csv():
+    #     csv_file_path = (run_path + "merged_df.csv")
+    #     open_csv_files(csv_file_path)
+    #
+    #
+    #
+    # # add buttons to view the result in csv format (open csv supported external application) in a new frame
+    # audio_download_button = tk.Button(download_frame, text="Download Audio CSV", command=download_audio_csv)
+    # audio_download_button.grid(row=0, column=0, padx=bottom_frame_column_gap)
+    #
+    # video_download_button = tk.Button(download_frame, text="Download Video CSV", command=download_video_csv)
+    # video_download_button.grid(row=0, column=1, padx=bottom_frame_column_gap)
+    #
+    # merged_download_button = tk.Button(download_frame, text="Download Merged CSV", command=download_merged_csv)
+    # merged_download_button.grid(row=0, column=2, padx=bottom_frame_column_gap)
+    #
+    # hate_sentiment_download_button = tk.Button(download_frame, text="Download Hate Sentiment CSV", command=download_hate_sentiment_csv)
+    # hate_sentiment_download_button.grid(row=0, column=3, padx=bottom_frame_column_gap)
+    #
+
+
+
+
+
+
+# Function to run showImage in a separate thread
+def run_showImage():
+    threading.Thread(target=showImage).start()
 
 # Define a function to toggle the status variable and label
 def toggle_status(status_var, label):
@@ -179,6 +357,25 @@ def toggle_status(status_var, label):
         label.config(text="✅")  # Update the label text to display a tick mark
     else:
         label.config(text=" ")  # Update the label text to display an empty space
+
+
+
+
+
+def open_csv_files(csv_file_path):
+    # Open the CSV file with UTF-8 encoding
+    with codecs.open(csv_file_path, "r", encoding="utf-8") as file:
+        # Read the CSV data
+        csv_data = csv.reader(file)
+
+        # Create a temporary file with UTF-16 encoding to save the data
+        temp_file_path = "temp_file.csv"
+        with open(temp_file_path, "w", encoding="utf-16") as temp_file:
+            # Write the non-empty rows to the temporary file with UTF-16 encoding
+            csv.writer(temp_file, delimiter="\t").writerows(
+                row for row in csv_data if any(field.strip() for field in row))
+    # Open the temporary file with the default associated application
+    os.startfile(temp_file_path)
 
 
 def tksleep(t):
@@ -202,6 +399,8 @@ if __name__ == '__main__':
     # create 2 horizontal frames in the content frame left and right
     content = Frame(root, width=1200, height=420, bg='white')
     content.pack(side=TOP)
+    bottom_frame = Frame(root, bg="white", width=1000, height=100)
+    bottom_frame.pack(side=TOP)
 
     # string variable with default value "model_1"
     model_choice = StringVar(value=default_model)
@@ -223,6 +422,7 @@ if __name__ == '__main__':
     # Merged severity
 
     # True or False for each step default False
+    downloading_status = BooleanVar(value=False)
     audio_conversion_status = BooleanVar(value=False)
     transcribing_n_processing_status = BooleanVar(value=False)
     domain_prediction_status = BooleanVar(value=False)
@@ -252,7 +452,7 @@ if __name__ == '__main__':
     input_text.place(x=150, y=40)
 
     # Button right to text input to call main()
-    btn = tk.Button(middle, text="Predict", command=showImage, font=("Arial Bold", 15), bg='white')
+    btn = tk.Button(middle, text="Predict", command=run_showImage, font=("Arial Bold", 15), bg='white')
     btn.place(x=800, y=40)
 
     # # show textvariable value in label
@@ -260,31 +460,6 @@ if __name__ == '__main__':
     # input_text.place(x=80, y=100)
 
     """Content Section"""
-
-    # # Create a label as Audio Conversion with ✅
-    # lbl_audio_conversion = tk.Label(content, text="Audio Conversion", font=("Arial Bold", 15), bg='white')
-    # x_dis = 80
-    # y_dis = 0
-    # # grid with column 0 and row 0 and dis as x and y
-    # lbl_audio_conversion.grid(column=0, row=0, padx=x_dis, pady=y_dis)
-    # if audio_conversion_status.get() == True:
-    #     lbl_audio_conversion_status = tk.Label(content, text="✅", font=("Arial Bold", 15), bg='white')
-    # else:
-    #     lbl_audio_conversion_status = tk.Label(content, text="", font=("Arial Bold", 15), bg='white')
-    # lbl_audio_conversion_status.grid(column=1, row=0, padx=x_dis, pady=y_dis)
-    #
-    # # Create a label as Transcribing and Processing with ✅
-    # lbl_transcribing_n_processing = tk.Label(content, text="Transcribing and Processing", font=("Arial Bold", 15), bg='white')
-    # # grid with column 0 and row 1 and dis as x and y
-    # lbl_transcribing_n_processing.grid(column=0, row=1, padx=x_dis, pady=y_dis)
-    # if transcribing_n_processing_status.get() == True:
-    #     lbl_transcribing_n_processing_status = tk.Label(content, text="✅", font=("Arial Bold", 15), bg='white')
-    # else:
-    #     lbl_transcribing_n_processing_status = tk.Label(content, text="", font=("Arial Bold", 15), bg='white')
-    # lbl_transcribing_n_processing_status.grid(column=1, row=1, padx=x_dis, pady=y_dis)
-
-    # Create the third frame with two columns
-    # third_frame = tk.Frame(root, width=1200, bg='blue')  # Set the width to 1200
 
     # Create the left subframe for "Some Text"
     left_subframe = tk.Frame(content, width=600, bg='white')
@@ -308,109 +483,10 @@ if __name__ == '__main__':
     timeline_padx = 80
     timeline_pady = 0
     timeline_sticky = 'w'
-    #
-    #
-    # lbl_audio_conversion = tk.Label(right_subframe, text="Audio Conversion", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_audio_conversion.grid(row=0, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if audio_conversion_status.get() == True:
-    #     lbl_audio_conversion_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_audio_conversion_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_audio_conversion_status.grid(row=0, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    #
-    # lbl_transcribing_n_processing = tk.Label(right_subframe, text="Transcribing and Processing", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_transcribing_n_processing.grid(row=1, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if transcribing_n_processing_status.get() == True:
-    #     lbl_transcribing_n_processing_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_transcribing_n_processing_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_transcribing_n_processing_status.grid(row=1, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    # # Create a label as domain prediction with ✅
-    # lbl_domain_prediction = tk.Label(right_subframe, text="Domain Prediction", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_domain_prediction.grid(row=2, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if domain_prediction_status.get() == True:
-    #     lbl_domain_prediction_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_domain_prediction_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_domain_prediction_status.grid(row=2, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    # # Create a label for age and gender estimation with ✅
-    # lbl_age_and_gender_estimation = tk.Label(right_subframe, text="Age and Gender Estimation", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_age_and_gender_estimation.grid(row=3, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if age_and_gender_estimation_status.get() == True:
-    #     lbl_age_and_gender_estimation_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_age_and_gender_estimation_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_age_and_gender_estimation_status.grid(row=3, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    # # Create a label for hate prediction with ✅
-    # lbl_hate_prediction = tk.Label(right_subframe, text="Hate Prediction", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_hate_prediction.grid(row=4, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if hate_prediction_status.get() == True:
-    #     lbl_hate_prediction_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_hate_prediction_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_hate_prediction_status.grid(row=4, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    # # Create a label for sentiment calculation with ✅
-    # lbl_sentiment_calculation = tk.Label(right_subframe, text="Sentiment Calculation", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_sentiment_calculation.grid(row=5, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if sentiment_calculation_status.get() == True:
-    #     lbl_sentiment_calculation_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_sentiment_calculation_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_sentiment_calculation_status.grid(row=5, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    # # Create a label for video prediction with ✅
-    # lbl_video_prediction = tk.Label(right_subframe, text="Video Prediction", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_video_prediction.grid(row=6, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if video_prediction_status.get() == True:
-    #     lbl_video_prediction_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_video_prediction_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_video_prediction_status.grid(row=6, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    # # Create a label for merging with ✅
-    # lbl_merging = tk.Label(right_subframe, text="Merging", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_merging.grid(row=7, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if merging_status.get() == True:
-    #     lbl_merging_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_merging_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_merging_status.grid(row=7, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    # # Create a label for audio severity with ✅
-    # lbl_audio_severity = tk.Label(right_subframe, text="Audio Severity", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_audio_severity.grid(row=8, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if audio_severity_status.get() == True:
-    #     lbl_audio_severity_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_audio_severity_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_audio_severity_status.grid(row=8, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    # # Create a label for video severity with ✅
-    # lbl_video_severity = tk.Label(right_subframe, text="Video Severity", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_video_severity.grid(row=9, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if video_severity_status.get() == True:
-    #     lbl_video_severity_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_video_severity_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_video_severity_status.grid(row=9, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    # # Create a label for merged severity with ✅
-    # lbl_merged_severity = tk.Label(right_subframe, text="Merged Severity", font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    # lbl_merged_severity.grid(row=10, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    # if merged_severity_status.get() == True:
-    #     lbl_merged_severity_status = tk.Label(right_subframe, text="✅", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # else:
-    #     lbl_merged_severity_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    # lbl_merged_severity_status.grid(row=10, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
 
     # Define a list of steps or tasks
     steps = [
+        ("Downloading", downloading_status),
         ("Audio Prediction", audio_conversion_status),
         ("Transcription", transcribing_n_processing_status),
         ("Domain Prediction", domain_prediction_status),
@@ -439,36 +515,6 @@ if __name__ == '__main__':
 
         lbl_step_status.grid(row=i + 2, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
 
-    # # Create labels dynamically for each step
-    # for i, (step_text, step_status) in enumerate(steps):
-    #     lbl_step = tk.Label(right_subframe, text=step_text, font=timeline_font, bg=timeline_bg, fg=timeline_fg, anchor=timeline_anchor, justify=timeline_justify)
-    #     lbl_step.grid(row=i+2, column=0, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    #     lbl_step_status = tk.Label(right_subframe, text=" ", font=timeline_tick_font, bg=timeline_bg, fg=timeline_fg)
-    #     lbl_step_status.grid(row=i+2, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-    #
-    #     toggle_status(step_status, lbl_step_status)  # Toggle the status and update the label
-    #
-    #     # Example: Button to toggle the status and update the label
-    #     btn_toggle = tk.Button(right_subframe, text="Toggle", command=lambda sv=step_status, lbl=lbl_step_status: toggle_status(sv, lbl))
-    #     btn_toggle.grid(row=i+2, column=2, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-
-    # Define the tick_tick function
-    # def tick_tick():
-    #     counter = 1
-    #     for i, (step_text, step_status) in enumerate(steps):
-    #         step_status.set(True)  # Set the status to True
-    #         lbl_step_status = lbl_step_statuses[i]  # Get the corresponding label
-    #
-    #         tick = "✅"
-    #         lbl_step_status.config(text=tick)  # Update the label with tick marks
-    #
-    #         counter += 1
-    #         print(counter)
-    #         # print time now in seconds
-    #         print(datetime.now().strftime('%S'))
-    #
-    #         sleep(1)  # Sleep for 1 second
 
     # Create labels dynamically for each step
     lbl_step_statuses = []  # List to store the label references
@@ -482,94 +528,41 @@ if __name__ == '__main__':
 
         lbl_step_statuses.append(lbl_step_status)  # Add the label reference to the list
 
-    # # Create a button to call the tick_tick function
-    # btn_tick = tk.Button(right_subframe, text="Tick", command=tick_tick)
-    # btn_tick.grid(row=len(steps)+2, column=0, columnspan=2, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
+    # # Example: Button to toggle a specific step
+    # btn_toggle = tk.Button(right_subframe, text="Toggle Step 2",
+    #                        command=lambda: toggle_single_item(1))  # Specify the index of the step to toggle
+    # btn_toggle.grid(row=2, column=2, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
 
-    # Example: Button to toggle a specific step
-    btn_toggle = tk.Button(right_subframe, text="Toggle Step 2",
-                           command=lambda: toggle_single_item(1))  # Specify the index of the step to toggle
-    btn_toggle.grid(row=2, column=2, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
 
     content.pack()
 
-    # # Function to toggle the status between True and False
-    # def toggle_status():
-    #     transcribing_n_processing_status.set(not transcribing_n_processing_status.get())
-    #     update_button_text()
+    # # show image in left side of the content
+    # img = ImageTk.PhotoImage(Image.open(run_path + "Age vs Frames.png"))
+    # panel = tk.Label(left_subframe, image=img)
+    # panel.pack(side="bottom", fill="both", expand="yes")
     #
-    # # Function to update the button text based on the status
-    # def update_button_text():
-    #     if transcribing_n_processing_status.get() == True:
-    #         lbl_transcribing_n_processing_status.configure(text="✅")
-    #     else:
-    #         lbl_transcribing_n_processing_status.configure(text="")
-    #
-    # # Create a button to toggle the status
-    # btn_toggle = tk.Button(right_subframe, text="Toggle", command=toggle_status, font=("Arial Bold", 15), bg='white')
-    # btn_toggle.grid(row=2, column=0, padx=80, pady=0)
-    #
-    # # Create a button to update the button text
-    # btn_update = tk.Button(right_subframe, text="Update", command=update_button_text, font=("Arial Bold", 15), bg='white')
-    # btn_update.grid(row=2, column=1, padx=10, pady=0, sticky='w')
+    # # show image in left side of the content
+    # img = ImageTk.PhotoImage(Image.open(run_path + "Age vs Frames.png"))
+    # panel = tk.Label(left_subframe, image=img)
+    # panel.pack(side="bottom", fill="both", expand="yes")
 
-    #
-    #
-    #
-    # # on right side of the image show text "Image"
-    # lbl = tk.Label(middle, text="Input", font=("Arial Bold", 20), bg='white')
-    # lbl.place(x=80, y=40)
-    #
-    # # # show the image in the gui and resize it to 256x256
-    # # placeHolderImageOpen = Image.open(placeHolderImagePath)
-    # # placeHolderImageOpen = placeHolderImageOpen.resize((256, 256), Image.ANTIALIAS)
-    # # placeHolderImage = ImageTk.PhotoImage(placeHolderImageOpen)
-    # # label = Label(middle, image=placeHolderImage, bg='red', width=256, height=256)
-    # # label.place(x=80, y=100)
-    #
-    # # Button below the image to pick image and command= pickImage
-    # pick_image_btn = tk.Button(middle, text="Pick Image", font=('arial', 15), width=10, height=1, bg='green',
-    #                            fg='white',
-    #                            command=pickImage)
-    # pick_image_btn.place(x=80, y=420)
-    #
-    # Radiobutton(middle, text=list(model_set.keys())[0], variable=model_choice,
-    #             value=model_set[list(model_set.keys())[0]], bg="white").place(x=90, y=380)
-    # Radiobutton(middle, text=list(model_set.keys())[1], variable=model_choice,
-    #             value=model_set[list(model_set.keys())[1]], bg="white").place(x=170, y=380)
-    # Radiobutton(middle, text=list(model_set.keys())[2], variable=model_choice,
-    #             value=model_set[list(model_set.keys())[2]], bg="white").place(x=250, y=380)
-    #
-    # # button to Predict
-    # get_prediction_btn = tk.Button(middle, text="Predict", font=('arial', 15), width=10, height=1, bg='green',
-    #                                fg='white',
-    #                                command=showImage)
-    # get_prediction_btn.place(x=220, y=420)
-    #
-    # """Intermediate Section"""
-    # # on right side of the image show text "Image"
-    # lbl = tk.Label(middle, text="Intermediate", font=("Arial Bold", 20), bg='white')
-    # lbl.place(x=400, y=40)
-    #
-    # """Result Section"""
-    # # on right side of the image show text "Image"
-    # lbl = tk.Label(middle, text="Result", font=("Arial Bold", 20), bg='white')
-    # lbl.place(x=870, y=40)
-    #
-    # # preidction score
-    # prediction_score = Label(middle, text="Prediction: ", font=("Arial", 10), bg='white')
-    # prediction_score.place(x=870, y=100)
-    #
-    # # preidction score
-    # prediction_score = Label(middle, text="Prediction Score: ", font=("Arial", 10), bg='white')
-    # prediction_score.place(x=870, y=150)
-    #
-    # # used model
-    # used_model = Label(middle, text="Used Model: ", font=("Arial", 10), bg='white')
-    # used_model.place(x=870, y=200)
+
+    """Bottom Section"""
+    bottom_frame = tk.Frame(root, width=1200, bg='white')
+    bottom_frame.pack(side=tk.TOP)
+
+    # add buttons to view the result in csv format (open csv supported external application) in a new frame
+    download_frame = tk.Frame(root, width=1200, bg='white')
+    download_frame.pack(side=tk.TOP)
+
+
+
+
+
 
     root.mainloop()
 
+# https://www.youtube.com/watch?v=DuDRAZNIjdU
 # Audio conversion
 # Transcribing and processing
 # Domain prediction

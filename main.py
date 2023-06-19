@@ -2,8 +2,8 @@ import re
 import numpy as np
 import pandas as pd
 
-from SubProcesses import video_sentiment, AudioSentiment, Merging, VideoPrediction, SentimentCalculation, HatePrediction, \
-    AgeNGenderEstimation, DomainPrediction, TranscribingNProcessing, AudioConversion, MergedSentiment, create_folder
+from SubProcesses import video_severity, audio_severity, Merging, VideoPrediction, SentimentCalculation, HatePrediction, \
+    AgeNGenderEstimation, DomainPrediction, TranscribingNProcessing, AudioConversion, merged_severity, create_folder
 
 # load word2vec model
 
@@ -39,11 +39,11 @@ def main(video_file):
 
     merged_df = Merging(file_name, run_path, video_df, word_sentiment_df)
 
-    AudioSentiment(run_path, word_sentiment_df)
+    audio_severity(run_path, word_sentiment_df)
 
-    video_sentiment(run_path, video_df)
+    video_severity(run_path, video_df)
 
-    MergedSentiment(merged_df, run_path)
+    merged_severity(merged_df, run_path)
 
     ##################################### Finalizing #####################################
 

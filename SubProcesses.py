@@ -20,7 +20,7 @@ from voice_classifier.featureExtractor import get_features_chunk
 from voice_classifier.gen_predictor import voice_gen_predict_df
 
 
-def video_sentiment(run_path, video_df):
+def video_severity(run_path, video_df):
     ##################################### video severity #####################################
     video_df = video_df[['age', 'gen', 'emotion', 'age_classes']]
     # onehot encoding on gen and emotion
@@ -37,13 +37,21 @@ def video_sentiment(run_path, video_df):
     video_df = video_df.dropna()
     # load video model
     video_severity_model = pickle.load(open("models/severity/severity_model_video.pkl", 'rb'))
-    # predict severity
-    video_df['severity'] = video_severity_model.predict(video_df)
-    # save df
-    video_df.to_csv(run_path + "video_predicted.csv", index=False)
+    # if not empty
+    if not video_df.empty:
+        # predict severity
+        video_df['severity'] = video_severity_model.predict(video_df)
+        # save df
+        video_df.to_csv(run_path + "video_predicted.csv", index=False)
+
+        return True
+    else:
+        print("video_df is empty")
+
+        return False
 
 
-def AudioSentiment(run_path, word_sentiment_df):
+def audio_severity(run_path, word_sentiment_df):
     ##################################### audio severity #####################################
     word_sentiment_df = word_sentiment_df[['classes', 'hate', 'sentiment_word']]
     # onehot encoding on classes, gen and emotion
@@ -61,10 +69,18 @@ def AudioSentiment(run_path, word_sentiment_df):
     word_sentiment_df = word_sentiment_df.dropna()
     # load audio model
     audio_severity_model = pickle.load(open("models/severity/audio_severity_model.pkl", 'rb'))
-    # predict severity
-    word_sentiment_df['severity'] = audio_severity_model.predict(word_sentiment_df)
-    # save df
-    word_sentiment_df.to_csv(run_path + "audio_predicted.csv", index=False)
+    if not word_sentiment_df.empty:
+        # predict severity
+        word_sentiment_df['severity'] = audio_severity_model.predict(word_sentiment_df)
+        # save df
+        word_sentiment_df.to_csv(run_path + "audio_predicted.csv", index=False)
+
+        return True
+    else:
+        print("audio severity is empty")
+
+        return False
+
 
 
 def Merging(file_name, run_path, video_df, word_sentiment_df):
@@ -182,7 +198,7 @@ def AudioConversion(file_name, run_path, video_file):
     wav_to_mono_flac(run_path + file_name[:-4] + ".wav")
 
 
-def MergedSentiment(merged_df, run_path):
+def merged_severity(merged_df, run_path):
     ##################################### mergeed severity #####################################
     merged_df = merged_df[
         ['classes', 'audio_age_range', 'audio_gen', 'hate', 'sentiment_word', 'age', 'gen', 'emotion', 'age_classes']]
@@ -203,11 +219,18 @@ def MergedSentiment(merged_df, run_path):
     merged_df = merged_df.dropna()
     # load merged model
     merged_severity_model = pickle.load(open("models/severity/severity_model_merged.pkl", 'rb'))
-    # predict severity
-    merged_df['severity'] = merged_severity_model.predict(merged_df)
-    # save df
-    merged_df.to_csv(run_path + "merged_predicted.csv", index=False)
-    print('Severity is predicted.')
+    if not merged_df.empty:
+        # predict severity
+        merged_df['severity'] = merged_severity_model.predict(merged_df)
+        # save df
+        merged_df.to_csv(run_path + "merged_predicted.csv", index=False)
+        print('Severity is predicted.')
+
+        return True
+    else:
+        print('No data to predict severity.')
+
+        return False
 
 
 def merge_audio_and_video(audio_df, video_df):
