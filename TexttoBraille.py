@@ -91,7 +91,6 @@ def Download(link):
         print("An error has occurred")
     print("Download is completed successfully")
 
-
     # get the .mp4 file in the runs folder
     run_path_file = glob.glob(run_path + "*.mp4")[0]
     print("run_path_file: ", run_path_file)
@@ -104,7 +103,6 @@ def Download(link):
     else:
         print("file name is not same")
         file_name = run_path_file
-
 
     return run_path, file_name, run_number
 
@@ -170,21 +168,25 @@ def showImage():
 
     print(run_path)
     print(file_name)
-    video_df = VideoPrediction(run_path, file_name)
+    # video_df = VideoPrediction(run_path, file_name)
+
+    video_df = pd.read_csv("runs/run_1/filtered_frames.csv")
 
     # is run_path + file_name exists
-    if os.path.exists(run_path + file_name):
-        # show video in player
-        video = os.startfile(run_path + file_name)
-        # read the video
-        cap = cv2.VideoCapture(run_path + file_name)
-        # get the frame count
-        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        print("frame_count: ", frame_count)
-    else:
-        print("file not exists")
-        print("file not exists")
-        print("file not exists")
+    # if os.path.exists(run_path + file_name):
+    #     # show video in player
+    #     video = os.startfile(run_path + file_name)
+    #     # read the video
+    #     cap = cv2.VideoCapture(run_path + file_name)
+    #     # get the frame count
+    #     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    #     print("frame_count: ", frame_count)
+    # else:
+    #     print("file not exists")
+    #     print("file not exists")
+    #     print("file not exists")
+
+    run_path = "runs/run_1/"
 
     if not video_df.empty:
         # show image in left side of the content
@@ -341,13 +343,10 @@ def showImage():
     #
 
 
-
-
-
-
 # Function to run showImage in a separate thread
 def run_showImage():
     threading.Thread(target=showImage).start()
+
 
 # Define a function to toggle the status variable and label
 def toggle_status(status_var, label):
@@ -357,9 +356,6 @@ def toggle_status(status_var, label):
         label.config(text="✅")  # Update the label text to display a tick mark
     else:
         label.config(text=" ")  # Update the label text to display an empty space
-
-
-
 
 
 def open_csv_files(csv_file_path):
@@ -515,7 +511,6 @@ if __name__ == '__main__':
 
         lbl_step_status.grid(row=i + 2, column=1, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
 
-
     # Create labels dynamically for each step
     lbl_step_statuses = []  # List to store the label references
     for i, (step_text, step_status) in enumerate(steps):
@@ -533,7 +528,6 @@ if __name__ == '__main__':
     #                        command=lambda: toggle_single_item(1))  # Specify the index of the step to toggle
     # btn_toggle.grid(row=2, column=2, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
 
-
     content.pack()
 
     # # show image in left side of the content
@@ -546,7 +540,6 @@ if __name__ == '__main__':
     # panel = tk.Label(left_subframe, image=img)
     # panel.pack(side="bottom", fill="both", expand="yes")
 
-
     """Bottom Section"""
     bottom_frame = tk.Frame(root, width=1200, bg='white')
     bottom_frame.pack(side=tk.TOP)
@@ -555,10 +548,33 @@ if __name__ == '__main__':
     download_frame = tk.Frame(root, width=1200, bg='white')
     download_frame.pack(side=tk.TOP)
 
+    run_path = "runs/run_1/"
 
+    # split left_subframe into two subframes vertically
+    left_subframe_1 = tk.Frame(left_subframe, width=600, bg='white')
+    left_subframe_1.pack(side=tk.TOP)
 
+    # split left_subframe into two subframes vertically
+    left_subframe_2 = tk.Frame(left_subframe, width=600, bg='white')
+    left_subframe_2.pack(side=tk.TOP)
 
+    # show image in left side of the content
+    agevsframes = Image.open(run_path + "Age vs Frames.png")
+    agevsframes = agevsframes.resize((600, 150), Image.ANTIALIAS)
+    img_1 = ImageTk.PhotoImage(agevsframes)
+    panel_1 = tk.Label(left_subframe_1, image=img_1)
+    panel_1.pack(side="bottom", fill="both", expand="yes")
 
+    tksleep(3)
+
+    # show image in left side of the content
+    variationofemotionsinframes = Image.open(run_path + "Variation of Emotions in Frames.png")
+    variationofemotionsinframes = variationofemotionsinframes.resize((600, 150), Image.ANTIALIAS)
+    img_2 = ImageTk.PhotoImage(variationofemotionsinframes)
+    panel_2 = tk.Label(left_subframe_2, image=img_2)
+    panel_2.pack(side="bottom", fill="both", expand="yes")
+
+    toggle_single_item(7)
 
     root.mainloop()
 

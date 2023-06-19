@@ -214,9 +214,9 @@ def predict(file_name, run_path):
         plt.title("Variation of Emotions in Frames")
         plt.xlabel("frame")
         plt.ylabel("emotion")
-        plt.gca().set_yticklabels(['Angry', 'Fear', 'Happy', 'Neutral', 'Sad'])
+        # plt.gca().set_yticklabels(['Angry', 'Fear', 'Happy', 'Neutral', 'Sad'])
         plt.tick_params(labelsize=10)
-        plt.show()
+        # plt.show()
         plt.savefig(run_path + "Variation of Emotions in Frames.png")
     else:
         print("No faces detected in the video")
