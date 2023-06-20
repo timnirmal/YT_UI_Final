@@ -112,8 +112,8 @@ def SentimentCalculation(hate_df, run_path):
 
 def HatePrediction(audio_df, run_path):
     # hate
-    # hate_df = predict_hate_df(audio_df)
-    # hate_df.to_csv(run_path + "hate_df.csv", index=False)
+    hate_df = predict_hate_df(audio_df)
+    hate_df.to_csv(run_path + "hate_df.csv", index=False)
     hate_df = pd.read_csv(run_path + "hate_df.csv")
     return hate_df
 
@@ -176,8 +176,8 @@ def AgeNGenderEstimation(audio_df, run_path, file_name):
 
 def DomainPrediction(audio_df, run_path):
     # classes
-    # audio_df = predict_classes_df(audio_df)
-    # audio_df.to_csv(run_path + "recognized_processed_classes.csv", index=False)
+    audio_df = predict_classes_df(audio_df)
+    audio_df.to_csv(run_path + "recognized_processed_classes.csv", index=False)
     audio_df = pd.read_csv(run_path + "recognized_processed_classes.csv")
     return audio_df
 
@@ -200,6 +200,9 @@ def AudioConversion(file_name, run_path, video_file):
 
 def merged_severity(merged_df, run_path):
     ##################################### mergeed severity #####################################
+    print(merged_df)
+    print()
+    print(merged_df.columns)
     merged_df = merged_df[
         ['classes', 'audio_age_range', 'audio_gen', 'hate', 'sentiment_word', 'age', 'gen', 'emotion', 'age_classes']]
     # onehot encoding on classes, gen and emotion
@@ -223,7 +226,7 @@ def merged_severity(merged_df, run_path):
         # predict severity
         merged_df['severity'] = merged_severity_model.predict(merged_df)
         # save df
-        merged_df.to_csv(run_path + "merged_predicted.csv", index=False)
+        merged_df.to_csv(run_path + "/merged_predicted.csv", index=False)
         print('Severity is predicted.')
 
         return True

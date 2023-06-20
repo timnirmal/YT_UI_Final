@@ -77,42 +77,53 @@
 # # # convert mp4 to wav
 # # sound = AudioSegment.from_file(src)
 # # sound.export(dst, format="wav")
-
+#
+# import pandas as pd
+# import numpy as np
+# import matplotlib.pyplot as plt
+#
+# from video.model import predict
+#
+# # video_file = r"D:\Projects\UI\datasets\3\Sri lankan Ticklish person (Kunuharapa).mkv"
+# video_file = r"Sri lankan Ticklish person (Kunuharapa).mp4"
+# run_path = r"D:\Projects\UI\runs\run_7"
+#
+# video_df = predict(video_file, run_path)
+#
+# df = pd.read_csv(r"filtered_frames.csv")
+#
+# df['age'] = df['age'].astype(int)
+# df.plot(y='age', figsize=(25,10), title='Age vs Frames', ylabel='age')
+# # save to png
+# plt.savefig("Age vs Frames.png")
+#
+#
+# dict_emo = df.set_index('frame').to_dict()['emotion']
+# x = np.array(list(zip(*dict_emo.items())))
+# u, ind = np.unique(x[1,:], return_inverse=True)
+# x[1,:] = ind
+# x = x.astype(int).T
+#
+# plt.figure(figsize=(20,5))
+# # plot the two columns of the array
+# plt.plot(x[:,0], x[:,1])
+# #set the labels accordinly
+# plt.gca().set_yticks(range(len(u)))
+# plt.title("Variation of Emotions in Frames")
+# plt.xlabel("frame")
+# plt.ylabel("emotion")
+# plt.gca().set_yticklabels(['Angry', 'Fear', 'Happy', 'Neutral', 'Sad'])
+# plt.tick_params(labelsize=10)
+# # plt.show()
+# plt.savefig("Variation of Emotions in Frames.png")
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
-from video.model import predict
+from SubProcesses import merged_severity
 
-# video_file = r"D:\Projects\UI\datasets\3\Sri lankan Ticklish person (Kunuharapa).mkv"
-video_file = r"Sri lankan Ticklish person (Kunuharapa).mp4"
-run_path = r"D:\Projects\UI\runs\run_7"
+run_path = "runs/run_6"
+merged_df = pd.read_csv("runs/run_6/merged_df.csv")
 
-video_df = predict(video_file, run_path)
+# remove first row
+merged_df = merged_df.iloc[1:]
 
-df = pd.read_csv(r"filtered_frames.csv")
-
-df['age'] = df['age'].astype(int)
-df.plot(y='age', figsize=(25,10), title='Age vs Frames', ylabel='age')
-# save to png
-plt.savefig("Age vs Frames.png")
-
-
-dict_emo = df.set_index('frame').to_dict()['emotion']
-x = np.array(list(zip(*dict_emo.items())))
-u, ind = np.unique(x[1,:], return_inverse=True)
-x[1,:] = ind
-x = x.astype(int).T
-
-plt.figure(figsize=(20,5))
-# plot the two columns of the array
-plt.plot(x[:,0], x[:,1])
-#set the labels accordinly
-plt.gca().set_yticks(range(len(u)))
-plt.title("Variation of Emotions in Frames")
-plt.xlabel("frame")
-plt.ylabel("emotion")
-plt.gca().set_yticklabels(['Angry', 'Fear', 'Happy', 'Neutral', 'Sad'])
-plt.tick_params(labelsize=10)
-# plt.show()
-plt.savefig("Variation of Emotions in Frames.png")
+merged_severity(merged_df,run_path)

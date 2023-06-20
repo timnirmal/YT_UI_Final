@@ -121,14 +121,14 @@ def toggle_single_item(index):
 
 def showImage():
     url = url_text.get()
-    # download the video
-    if url.startswith("https://www.youtube.com/watch?v="):
-        run_path, file_name, run_number = Download(url)
-    else:
-        print("Not a YouTube link")
-
-    toggle_single_item(0)
-
+    # # download the video
+    # if url.startswith("https://www.youtube.com/watch?v="):
+    #     run_path, file_name, run_number = Download(url)
+    # else:
+    #     print("Not a YouTube link")
+    #
+    # toggle_single_item(0)
+    #
     # # run_number = 7
     # # file_name = "People X Nainowale Ne  Chillout Mashup  @YashrajMukhateOfficial   MEHER.mp4"
     # # run_path = "runs/run_6/"
@@ -165,12 +165,14 @@ def showImage():
     #
     # word_sentiment_df = SentimentCalculation(hate_df, run_path)
     # toggle_single_item(6)
-
-    print(run_path)
-    print(file_name)
+    #
+    # print(run_path)
+    # print(file_name)
     # video_df = VideoPrediction(run_path, file_name)
 
-    video_df = pd.read_csv("runs/run_1/filtered_frames.csv")
+    video_df = pd.read_csv("runs/run_7/filtered_frames.csv")
+
+    run_path = "runs/run_7/"
 
     # is run_path + file_name exists
     # if os.path.exists(run_path + file_name):
@@ -186,18 +188,27 @@ def showImage():
     #     print("file not exists")
     #     print("file not exists")
 
-    run_path = "runs/run_1/"
 
     if not video_df.empty:
         # show image in left side of the content
-        img = ImageTk.PhotoImage(Image.open(run_path + "Age vs Frames.png"))
-        panel = tk.Label(left_subframe, image=img)
-        panel.pack(side="bottom", fill="both", expand="yes")
+        agevsframes = Image.open(run_path + "Age vs Frames.png")
+        agevsframes = agevsframes.resize((550, 170), Image.ANTIALIAS)
+        global img_1
+        img_1 = ImageTk.PhotoImage(agevsframes)
+        panel_1 = tk.Label(left_subframe, image=img_1)
+        panel_1.pack(side="bottom", fill="both", expand="yes")
+
+        # tksleep(3)
 
         # show image in left side of the content
-        img = ImageTk.PhotoImage(Image.open(run_path + "Age vs Frames.png"))
-        panel = tk.Label(left_subframe, image=img)
-        panel.pack(side="bottom", fill="both", expand="yes")
+        variationofemotionsinframes = Image.open(run_path + "Variation of Emotions in Frames.png")
+        variationofemotionsinframes = variationofemotionsinframes.resize((550, 170), Image.ANTIALIAS)
+        global img_2
+        img_2 = ImageTk.PhotoImage(variationofemotionsinframes)
+        panel_2 = tk.Label(left_subframe, image=img_2)
+        panel_2.pack(side="bottom", fill="both", expand="yes")
+    else:
+        print("video_df is empty")
 
     toggle_single_item(7)
 
@@ -225,7 +236,7 @@ def showImage():
     #     video_severity_done = False
     #
     # if not merged_df.empty:
-    #     merged_severity_done = merged_severity(run_path, merged_df)
+    #     merged_severity_done = merged_severity(merged_df, run_path)
     #     if merged_severity_done:
     #         toggle_single_item(11)
     # else:
@@ -340,7 +351,6 @@ def showImage():
     #
     # hate_sentiment_download_button = tk.Button(download_frame, text="Download Hate Sentiment CSV", command=download_hate_sentiment_csv)
     # hate_sentiment_download_button.grid(row=0, column=3, padx=bottom_frame_column_gap)
-    #
 
 
 # Function to run showImage in a separate thread
@@ -392,11 +402,24 @@ if __name__ == '__main__':
     top.pack(side=TOP)
     middle = Frame(root, width=1200, height=100, bg='white')
     middle.pack(side=TOP)
+
     # create 2 horizontal frames in the content frame left and right
     content = Frame(root, width=1200, height=420, bg='white')
     content.pack(side=TOP)
-    bottom_frame = Frame(root, bg="white", width=1000, height=100)
-    bottom_frame.pack(side=TOP)
+
+    # Create the left subframe for "Some Text"
+    left_subframe = tk.Frame(content, width=600, bg='white')
+    left_subframe.pack(side=tk.LEFT)
+
+    # Create the right subframe for code segment 1
+    right_subframe = tk.Frame(content, width=600, bg='blue')
+    right_subframe.pack(side=tk.RIGHT)
+
+    bottom_frame = tk.Frame(root, width=1200, bg='blue')
+    bottom_frame.pack(side=tk.TOP)
+
+    download_frame = tk.Frame(root, width=1200, bg='blue')
+    download_frame.pack(side=tk.TOP)
 
     # string variable with default value "model_1"
     model_choice = StringVar(value=default_model)
@@ -457,16 +480,7 @@ if __name__ == '__main__':
 
     """Content Section"""
 
-    # Create the left subframe for "Some Text"
-    left_subframe = tk.Frame(content, width=600, bg='white')
-    left_subframe.pack(side=tk.LEFT)
-    lbl_some_text = tk.Label(left_subframe, text="                                                        ",
-                             font=("Arial Bold", 15), bg='white', anchor='w', justify='left')
-    lbl_some_text.pack(padx=80, pady=0)
 
-    # Create the right subframe for code segment 1
-    right_subframe = tk.Frame(content, width=600, bg='white')
-    right_subframe.pack(side=tk.LEFT)
 
     timeline_font_size = 12
     timeline_font = ("Arial Bold", timeline_font_size)
@@ -528,7 +542,10 @@ if __name__ == '__main__':
     #                        command=lambda: toggle_single_item(1))  # Specify the index of the step to toggle
     # btn_toggle.grid(row=2, column=2, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
 
-    content.pack()
+
+    lbl_some_text = tk.Label(left_subframe, text="                                                        ",
+                             font=("Arial Bold", 15), bg='white', anchor='w', justify='left')
+    lbl_some_text.pack(padx=80, pady=0)
 
     # # show image in left side of the content
     # img = ImageTk.PhotoImage(Image.open(run_path + "Age vs Frames.png"))
@@ -540,41 +557,36 @@ if __name__ == '__main__':
     # panel = tk.Label(left_subframe, image=img)
     # panel.pack(side="bottom", fill="both", expand="yes")
 
-    """Bottom Section"""
-    bottom_frame = tk.Frame(root, width=1200, bg='white')
-    bottom_frame.pack(side=tk.TOP)
+    # run_path = "runs/run_1/"
 
-    # add buttons to view the result in csv format (open csv supported external application) in a new frame
-    download_frame = tk.Frame(root, width=1200, bg='white')
-    download_frame.pack(side=tk.TOP)
+    # # Create two subframes in the left subframe using grid layout
+    # left_subframe_1 = tk.Frame(left_subframe, width=600, bg='black')
+    # left_subframe_1.grid(row=0, column=0)
+    #
+    # left_subframe_2 = tk.Frame(left_subframe, width=600, bg='black')
+    # left_subframe_2.grid(row=1, column=0)
 
-    run_path = "runs/run_1/"
+    # run_path = "runs/run_7/"
 
-    # split left_subframe into two subframes vertically
-    left_subframe_1 = tk.Frame(left_subframe, width=600, bg='white')
-    left_subframe_1.pack(side=tk.TOP)
-
-    # split left_subframe into two subframes vertically
-    left_subframe_2 = tk.Frame(left_subframe, width=600, bg='white')
-    left_subframe_2.pack(side=tk.TOP)
-
-    # show image in left side of the content
-    agevsframes = Image.open(run_path + "Age vs Frames.png")
-    agevsframes = agevsframes.resize((600, 150), Image.ANTIALIAS)
-    img_1 = ImageTk.PhotoImage(agevsframes)
-    panel_1 = tk.Label(left_subframe_1, image=img_1)
-    panel_1.pack(side="bottom", fill="both", expand="yes")
-
-    tksleep(3)
-
-    # show image in left side of the content
-    variationofemotionsinframes = Image.open(run_path + "Variation of Emotions in Frames.png")
-    variationofemotionsinframes = variationofemotionsinframes.resize((600, 150), Image.ANTIALIAS)
-    img_2 = ImageTk.PhotoImage(variationofemotionsinframes)
-    panel_2 = tk.Label(left_subframe_2, image=img_2)
-    panel_2.pack(side="bottom", fill="both", expand="yes")
+    # # Show image in the left side of the content
+    # agevsframes = Image.open(run_path + "Age vs Frames.png")
+    # agevsframes = agevsframes.resize((600, 150), Image.ANTIALIAS)
+    # img_1 = ImageTk.PhotoImage(agevsframes)
+    # panel_1 = tk.Label(left_subframe, image=img_1)
+    # panel_1.pack(side="bottom", fill="both", expand="yes")
+    #
+    # tksleep(3)
+    #
+    # # show image in left side of the content
+    # variationofemotionsinframes = Image.open(run_path + "Variation of Emotions in Frames.png")
+    # variationofemotionsinframes = variationofemotionsinframes.resize((600, 150), Image.ANTIALIAS)
+    # img_2 = ImageTk.PhotoImage(variationofemotionsinframes)
+    # panel_2 = tk.Label(left_subframe, image=img_2)
+    # panel_2.pack(side="bottom", fill="both", expand="yes")
 
     toggle_single_item(7)
+
+
 
     root.mainloop()
 
