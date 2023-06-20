@@ -10,8 +10,8 @@ from audio.process_data import process_data_df
 from audio.process_with_timestamp import process_with_timestamp
 from audio.transcribe_data_gcloud import get_large_audio_transcription
 from audio.video_to_audio import convert_video_to_audio_ffmpeg, wav_to_mono_flac
-# from classes.classes_predict import predict_classes_df
-# from hate.hate_lstm_predict import predict_hate_df
+from classes.classes_predict import predict_classes_df
+from hate.hate_lstm_predict import predict_hate_df
 from lib.sync_av import sync_audio_and_video
 from sentiment.sentiment_word import calculate_sentiment_df
 from video.model import predict

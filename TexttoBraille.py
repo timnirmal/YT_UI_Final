@@ -29,11 +29,7 @@ openFilePath = os.path.join(currentPath, "test_images")
 placeHolderImagePath = r"placeholder.jpg"
 data = []
 default_model = "model_3"
-model_set = {
-    "original": "model_1",
-    "2 LSTM": "model_2",
-    "1 LSTM": "model_3"
-}
+
 
 
 def pickImage():
@@ -121,58 +117,58 @@ def toggle_single_item(index):
 
 def showImage():
     url = url_text.get()
-    # # download the video
-    # if url.startswith("https://www.youtube.com/watch?v="):
-    #     run_path, file_name, run_number = Download(url)
-    # else:
-    #     print("Not a YouTube link")
-    #
-    # toggle_single_item(0)
-    #
-    # # run_number = 7
-    # # file_name = "People X Nainowale Ne  Chillout Mashup  @YashrajMukhateOfficial   MEHER.mp4"
-    # # run_path = "runs/run_6/"
-    #
-    # print("run_path: ", run_path)
-    # print("file_name: ", file_name)
-    #
-    # AudioConversion(file_name, run_path, file_name)
-    # toggle_single_item(1)
-    #
-    # audio_df = TranscribingNProcessing(file_name, run_number, run_path)
-    # toggle_single_item(2)
-    #
-    # sleep(50)
-    # print("sleeping for 50 seconds")
-    # print("sleeping for 50 seconds")
-    # print("sleeping for 50 seconds")
-    # print("sleeping for 50 seconds")
-    # print("sleeping for 50 seconds")
-    # print("sleeping for 50 seconds")
-    # print("sleeping for 50 seconds")
-    # print("sleeping for 50 seconds")
-    # print("sleeping for 50 seconds")
-    # print("sleeping for 50 seconds")
-    #
-    # audio_df = DomainPrediction(audio_df, run_path)
-    # toggle_single_item(3)
-    #
-    # audio_df = AgeNGenderEstimation(audio_df, run_path, file_name)
-    # toggle_single_item(4)
-    #
-    # hate_df = HatePrediction(audio_df, run_path)
-    # toggle_single_item(5)
-    #
-    # word_sentiment_df = SentimentCalculation(hate_df, run_path)
-    # toggle_single_item(6)
-    #
-    # print(run_path)
-    # print(file_name)
-    # video_df = VideoPrediction(run_path, file_name)
+    # download the video
+    if url.startswith("https://www.youtube.com/watch?v="):
+        run_path, file_name, run_number = Download(url)
+    else:
+        print("Not a YouTube link")
 
-    video_df = pd.read_csv("runs/run_7/filtered_frames.csv")
+    toggle_single_item(0)
 
-    run_path = "runs/run_7/"
+    # run_number = 7
+    # file_name = "People X Nainowale Ne  Chillout Mashup  @YashrajMukhateOfficial   MEHER.mp4"
+    # run_path = "runs/run_6/"
+
+    print("run_path: ", run_path)
+    print("file_name: ", file_name)
+
+    AudioConversion(file_name, run_path, file_name)
+    toggle_single_item(1)
+
+    audio_df = TranscribingNProcessing(file_name, run_number, run_path)
+    toggle_single_item(2)
+
+    sleep(50)
+    print("sleeping for 50 seconds")
+    print("sleeping for 50 seconds")
+    print("sleeping for 50 seconds")
+    print("sleeping for 50 seconds")
+    print("sleeping for 50 seconds")
+    print("sleeping for 50 seconds")
+    print("sleeping for 50 seconds")
+    print("sleeping for 50 seconds")
+    print("sleeping for 50 seconds")
+    print("sleeping for 50 seconds")
+
+    audio_df = DomainPrediction(audio_df, run_path)
+    toggle_single_item(3)
+
+    audio_df = AgeNGenderEstimation(audio_df, run_path, file_name)
+    toggle_single_item(4)
+
+    hate_df = HatePrediction(audio_df, run_path)
+    toggle_single_item(5)
+
+    word_sentiment_df = SentimentCalculation(hate_df, run_path)
+    toggle_single_item(6)
+
+    print(run_path)
+    print(file_name)
+    video_df = VideoPrediction(run_path, file_name)
+
+    # video_df = pd.read_csv("runs/run_7/filtered_frames.csv")
+    #
+    # run_path = "runs/run_7/"
 
     # is run_path + file_name exists
     # if os.path.exists(run_path + file_name):
@@ -212,145 +208,132 @@ def showImage():
 
     toggle_single_item(7)
 
-    # print(audio_df.head())
-    # print(video_df.head())
-    #
-    # merged_df = Merging(file_name, run_path, video_df, word_sentiment_df)
-    # toggle_single_item(8)
-    #
-    # if not word_sentiment_df.empty:
-    #     audio_severity_done = audio_severity(run_path, word_sentiment_df)
-    #     if audio_severity_done:
-    #         toggle_single_item(9)
-    # else:
-    #     print("audio severity not done")
-    #     audio_severity_done = False
-    #
-    #
-    # if not video_df.empty:
-    #     video_severity_done = video_severity(run_path, video_df)
-    #     if video_severity_done:
-    #         toggle_single_item(10)
-    # else:
-    #     print("video severity not done")
-    #     video_severity_done = False
-    #
-    # if not merged_df.empty:
-    #     merged_severity_done = merged_severity(merged_df, run_path)
-    #     if merged_severity_done:
-    #         toggle_single_item(11)
-    # else:
-    #     print("merged severity not done")
-    #     merged_severity_done = False
-    #
-    #
-    # ##################################### Finalizing #####################################
-    # if audio_severity_done:
-    #     audio_df = pd.read_csv(run_path + "audio_predicted.csv")[['hate', 'severity']]
-    #     print("Mean of the audio hate: ", np.mean(audio_df['hate']), " - ", np.round(np.mean(audio_df['hate']) * 100, 2),
-    #           "%")
-    #     print("Mean of the audio severity: ", np.mean(audio_df['severity']), " - ",
-    #           np.round(np.mean(audio_df['severity']) * 25, 2), "%")
-    #     audio_hate_mean = np.round(np.mean(audio_df['hate']) * 100, 2)
-    #     audio_severity_mean = np.round(np.mean(audio_df['severity']) * 25, 2)
-    # else:
-    #     audio_hate_mean = "NaN"
-    #     audio_severity_mean = "NaN"
-    #
-    # if video_severity_done:
-    #     video_df = pd.read_csv(run_path + "video_predicted.csv")[['severity']]
-    #     print("Mean of the video severity: ", np.mean(video_df['severity']), " - ",
-    #           np.round(np.mean(video_df['severity']) * 25, 2), "%")
-    #     video_severity_mean = np.round(np.mean(video_df['severity']) * 25, 2)
-    # else:
-    #     video_severity_mean = "NaN"
-    #
-    #
-    # if audio_severity_done and video_severity_done and merged_severity_done:
-    #     merged_df = pd.read_csv(run_path + "merged_predicted.csv")[['hate', 'severity']]
-    #     print("Mean of the merged severity: ", np.mean(merged_df['severity']), " - ",
-    #           np.round(np.mean(merged_df['severity']) * 25, 2), "%")
-    #     merged_severity_mean = np.round(np.mean(merged_df['severity']) * 25, 2)
-    # else:
-    #     merged_severity_mean = "NaN"
-    #
-    # # create new fram below content frame
-    #
-    #
-    # # audio_hate_mean_label = Label(bottom_frame, text=audio_hate_mean)
-    # # audio_hate_mean_label.grid(row=1, column=1)
-    # #
-    # # audio_severity_mean_label = Label(bottom_frame, text=audio_severity_mean)
-    # # audio_severity_mean_label.grid(row=2, column=1)
-    # #
-    # # video_severity_mean_label = Label(bottom_frame, text=video_severity_mean)
-    # # video_severity_mean_label.grid(row=3, column=1)
-    # #
-    # # merged_severity_mean_label = Label(bottom_frame, text=merged_severity_mean)
-    # # merged_severity_mean_label.grid(row=4, column=1)
-    #
-    # bottom_frame_column_gap = 40
-    # bottom_frame_title_font_size = 12
-    # bottom_frame_title_font = ("Arial Bold", bottom_frame_title_font_size)
-    # bottom_frame_title_bg = 'white'
-    # bottom_frame_title_fg = 'black'
-    # bottom_frame_value_font_size = 12
-    # bottom_frame_value_font = ("Arial Bold", bottom_frame_value_font_size)
-    # bottom_frame_value_bg = 'white'
-    # bottom_frame_value_fg = 'black'
-    #
-    # audio_hate_mean_label = Label(bottom_frame, text="Audio Hate Mean", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
-    # audio_hate_mean_label.grid(row=0, column=0, padx=bottom_frame_column_gap)
-    # audio_hate_mean_title = Label(bottom_frame, text=audio_hate_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
-    # audio_hate_mean_title.grid(row=1, column=0, padx=bottom_frame_column_gap)
-    #
-    # audio_severity_mean_label_title = Label(bottom_frame, text="Audio Severity Mean", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
-    # audio_severity_mean_label_title.grid(row=0, column=1, padx=bottom_frame_column_gap)
-    # audio_severity_mean_label = Label(bottom_frame, text=audio_severity_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
-    # audio_severity_mean_label.grid(row=1, column=1, padx=bottom_frame_column_gap)
-    #
-    # video_hate_mean_label_title = Label(bottom_frame, text="Video Hate Mean", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
-    # video_hate_mean_label_title.grid(row=0, column=2, padx=bottom_frame_column_gap)
-    # video_hate_mean_label = Label(bottom_frame, text="NaN", font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
-    # video_hate_mean_label.grid(row=1, column=2, padx=bottom_frame_column_gap)
-    #
-    # video_severity_mean_label_title = Label(bottom_frame, text="Video Severity Mean", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
-    # video_severity_mean_label_title.grid(row=0, column=3, padx=bottom_frame_column_gap)
-    # merged_severity_mean_label = Label(bottom_frame, text=video_severity_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
-    # merged_severity_mean_label.grid(row=1, column=3, padx=bottom_frame_column_gap)
-    #
-    #
-    # def download_audio_csv():
-    #     # Open the CSV file with UTF-8 encoding
-    #     csv_file_path = (run_path + "recognized_processed_classes_features_age_gen.csv")
-    #     open_csv_files(csv_file_path)
-    #
-    # def download_video_csv():
-    #     csv_file_path = (run_path + "filtered_frames.csv")
-    #     open_csv_files(csv_file_path)
-    #
-    # def download_hate_sentiment_csv():
-    #     csv_file_path = (run_path + "word_sentiment_df.csv")
-    #     open_csv_files(csv_file_path)
-    #
-    # def download_merged_csv():
-    #     csv_file_path = (run_path + "merged_df.csv")
-    #     open_csv_files(csv_file_path)
-    #
-    #
-    #
-    # # add buttons to view the result in csv format (open csv supported external application) in a new frame
-    # audio_download_button = tk.Button(download_frame, text="Download Audio CSV", command=download_audio_csv)
-    # audio_download_button.grid(row=0, column=0, padx=bottom_frame_column_gap)
-    #
-    # video_download_button = tk.Button(download_frame, text="Download Video CSV", command=download_video_csv)
-    # video_download_button.grid(row=0, column=1, padx=bottom_frame_column_gap)
-    #
-    # merged_download_button = tk.Button(download_frame, text="Download Merged CSV", command=download_merged_csv)
-    # merged_download_button.grid(row=0, column=2, padx=bottom_frame_column_gap)
-    #
-    # hate_sentiment_download_button = tk.Button(download_frame, text="Download Hate Sentiment CSV", command=download_hate_sentiment_csv)
-    # hate_sentiment_download_button.grid(row=0, column=3, padx=bottom_frame_column_gap)
+    print(audio_df.head())
+    print(video_df.head())
+
+    merged_df = Merging(file_name, run_path, video_df, word_sentiment_df)
+    toggle_single_item(8)
+
+    if not word_sentiment_df.empty:
+        audio_severity_done = audio_severity(run_path, word_sentiment_df)
+        if audio_severity_done:
+            toggle_single_item(9)
+    else:
+        print("audio severity not done")
+        audio_severity_done = False
+
+
+    if not video_df.empty:
+        video_severity_done = video_severity(run_path, video_df)
+        if video_severity_done:
+            toggle_single_item(10)
+    else:
+        print("video severity not done")
+        video_severity_done = False
+
+    if not merged_df.empty:
+        merged_severity_done = merged_severity(merged_df, run_path)
+        if merged_severity_done:
+            toggle_single_item(11)
+    else:
+        print("merged severity not done")
+        merged_severity_done = False
+
+
+    ##################################### Finalizing #####################################
+    if audio_severity_done:
+        audio_df = pd.read_csv(run_path + "audio_predicted.csv")[['hate', 'severity']]
+        print("Mean of the audio hate: ", np.mean(audio_df['hate']), " - ", np.round(np.mean(audio_df['hate']) * 100, 2),
+              "%")
+        print("Mean of the audio severity: ", np.mean(audio_df['severity']), " - ",
+              np.round(np.mean(audio_df['severity']) * 25, 2), "%")
+        audio_hate_mean = np.round(np.mean(audio_df['hate']) * 100, 2)
+        audio_severity_mean = np.round(np.mean(audio_df['severity']) * 25, 2)
+    else:
+        audio_hate_mean = "NaN"
+        audio_severity_mean = "NaN"
+
+    if video_severity_done:
+        video_df = pd.read_csv(run_path + "video_predicted.csv")[['severity']]
+        print("Mean of the video severity: ", np.mean(video_df['severity']), " - ",
+              np.round(np.mean(video_df['severity']) * 25, 2), "%")
+        video_severity_mean = np.round(np.mean(video_df['severity']) * 25, 2)
+    else:
+        video_severity_mean = "NaN"
+
+
+    if audio_severity_done and video_severity_done and merged_severity_done:
+        merged_df = pd.read_csv(run_path + "merged_predicted.csv")[['hate', 'severity']]
+        print("Mean of the merged severity: ", np.mean(merged_df['severity']), " - ",
+              np.round(np.mean(merged_df['severity']) * 25, 2), "%")
+        merged_severity_mean = np.round(np.mean(merged_df['severity']) * 25, 2)
+    else:
+        merged_severity_mean = "NaN"
+
+    bottom_frame_column_gap = 40
+    bottom_frame_title_font_size = 12
+    bottom_frame_title_font = ("Arial Bold", bottom_frame_title_font_size)
+    bottom_frame_title_bg = 'white'
+    bottom_frame_title_fg = 'black'
+    bottom_frame_value_font_size = 12
+    bottom_frame_value_font = ("Arial Bold", bottom_frame_value_font_size)
+    bottom_frame_value_bg = 'white'
+    bottom_frame_value_fg = 'black'
+
+    audio_hate_mean_label = Label(bottom_frame, text="Audio Hate", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    audio_hate_mean_label.grid(row=0, column=0, padx=bottom_frame_column_gap)
+    audio_hate_mean_title = Label(bottom_frame, text=audio_hate_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    audio_hate_mean_title.grid(row=1, column=0, padx=bottom_frame_column_gap)
+
+    audio_severity_mean_label_title = Label(bottom_frame, text="Audio Severity", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    audio_severity_mean_label_title.grid(row=0, column=1, padx=bottom_frame_column_gap)
+    audio_severity_mean_label = Label(bottom_frame, text=audio_severity_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    audio_severity_mean_label.grid(row=1, column=1, padx=bottom_frame_column_gap)
+
+    video_hate_mean_label_title = Label(bottom_frame, text="Video Severity", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    video_hate_mean_label_title.grid(row=0, column=2, padx=bottom_frame_column_gap)
+    video_hate_mean_label = Label(bottom_frame, text=video_severity_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    video_hate_mean_label.grid(row=1, column=2, padx=bottom_frame_column_gap)
+
+    video_severity_mean_label_title = Label(bottom_frame, text="Video Severity", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    video_severity_mean_label_title.grid(row=0, column=3, padx=bottom_frame_column_gap)
+    merged_severity_mean_label = Label(bottom_frame, text=merged_severity_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    merged_severity_mean_label.grid(row=1, column=3, padx=bottom_frame_column_gap)
+
+
+    def download_audio_csv():
+        # Open the CSV file with UTF-8 encoding
+        csv_file_path = (run_path + "recognized_processed_classes_features_age_gen.csv")
+        open_csv_files(csv_file_path)
+
+    def download_video_csv():
+        csv_file_path = (run_path + "filtered_frames.csv")
+        open_csv_files(csv_file_path)
+
+    def download_hate_sentiment_csv():
+        csv_file_path = (run_path + "word_sentiment_df.csv")
+        open_csv_files(csv_file_path)
+
+    def download_merged_csv():
+        csv_file_path = (run_path + "merged_df.csv")
+        open_csv_files(csv_file_path)
+
+
+
+    # add buttons to view the result in csv format (open csv supported external application) in a new frame
+    audio_download_button = tk.Button(download_frame, text="Download Audio CSV", command=download_audio_csv)
+    audio_download_button.grid(row=0, column=0, padx=bottom_frame_column_gap)
+
+    hate_sentiment_download_button = tk.Button(download_frame, text="Download Hate Sentiment CSV", command=download_hate_sentiment_csv)
+    hate_sentiment_download_button.grid(row=0, column=1, padx=bottom_frame_column_gap)
+
+    video_download_button = tk.Button(download_frame, text="Download Video CSV", command=download_video_csv)
+    video_download_button.grid(row=0, column=2, padx=bottom_frame_column_gap)
+
+    merged_download_button = tk.Button(download_frame, text="Download Merged CSV", command=download_merged_csv)
+    merged_download_button.grid(row=0, column=3, padx=bottom_frame_column_gap)
+
+
 
 
 # Function to run showImage in a separate thread
@@ -537,55 +520,9 @@ if __name__ == '__main__':
 
         lbl_step_statuses.append(lbl_step_status)  # Add the label reference to the list
 
-    # # Example: Button to toggle a specific step
-    # btn_toggle = tk.Button(right_subframe, text="Toggle Step 2",
-    #                        command=lambda: toggle_single_item(1))  # Specify the index of the step to toggle
-    # btn_toggle.grid(row=2, column=2, padx=timeline_padx, pady=timeline_pady, sticky=timeline_sticky)
-
-
     lbl_some_text = tk.Label(left_subframe, text="                                                        ",
                              font=("Arial Bold", 15), bg='white', anchor='w', justify='left')
     lbl_some_text.pack(padx=80, pady=0)
-
-    # # show image in left side of the content
-    # img = ImageTk.PhotoImage(Image.open(run_path + "Age vs Frames.png"))
-    # panel = tk.Label(left_subframe, image=img)
-    # panel.pack(side="bottom", fill="both", expand="yes")
-    #
-    # # show image in left side of the content
-    # img = ImageTk.PhotoImage(Image.open(run_path + "Age vs Frames.png"))
-    # panel = tk.Label(left_subframe, image=img)
-    # panel.pack(side="bottom", fill="both", expand="yes")
-
-    # run_path = "runs/run_1/"
-
-    # # Create two subframes in the left subframe using grid layout
-    # left_subframe_1 = tk.Frame(left_subframe, width=600, bg='black')
-    # left_subframe_1.grid(row=0, column=0)
-    #
-    # left_subframe_2 = tk.Frame(left_subframe, width=600, bg='black')
-    # left_subframe_2.grid(row=1, column=0)
-
-    # run_path = "runs/run_7/"
-
-    # # Show image in the left side of the content
-    # agevsframes = Image.open(run_path + "Age vs Frames.png")
-    # agevsframes = agevsframes.resize((600, 150), Image.ANTIALIAS)
-    # img_1 = ImageTk.PhotoImage(agevsframes)
-    # panel_1 = tk.Label(left_subframe, image=img_1)
-    # panel_1.pack(side="bottom", fill="both", expand="yes")
-    #
-    # tksleep(3)
-    #
-    # # show image in left side of the content
-    # variationofemotionsinframes = Image.open(run_path + "Variation of Emotions in Frames.png")
-    # variationofemotionsinframes = variationofemotionsinframes.resize((600, 150), Image.ANTIALIAS)
-    # img_2 = ImageTk.PhotoImage(variationofemotionsinframes)
-    # panel_2 = tk.Label(left_subframe, image=img_2)
-    # panel_2.pack(side="bottom", fill="both", expand="yes")
-
-    toggle_single_item(7)
-
 
 
     root.mainloop()
