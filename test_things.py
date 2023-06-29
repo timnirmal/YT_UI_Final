@@ -118,12 +118,23 @@
 # plt.savefig("Variation of Emotions in Frames.png")
 import pandas as pd
 
-from SubProcesses import merged_severity
+# from SubProcesses import merged_severity
+from video.model import predict
 
-run_path = "runs/run_6"
-merged_df = pd.read_csv("runs/run_6/merged_df.csv")
+# run_path = "runs/run_6"
+run_path = "test_files/"
+video_file = "Malinga.mkv"
 
-# remove first row
-merged_df = merged_df.iloc[1:]
+predict(video_file, run_path)
+print("predicted")
+video_df = pd.read_csv(run_path + "filtered_frames.csv")
+print("Done prediction")
 
-merged_severity(merged_df,run_path)
+#
+#
+# merged_df = pd.read_csv("runs/run_6/merged_df.csv")
+#
+# # remove first row
+# merged_df = merged_df.iloc[1:]
+#
+# merged_severity(merged_df,run_path)

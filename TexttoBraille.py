@@ -2,10 +2,7 @@ import codecs
 import csv
 import glob
 import os
-import subprocess
 import tkinter as tk
-from datetime import datetime
-from time import sleep
 from tkinter import *
 from tkinter import filedialog
 
@@ -13,8 +10,6 @@ import cv2
 import numpy as np
 import pandas as pd
 from PIL import Image, ImageTk
-from keras.utils import img_to_array
-from pytube import YouTube
 import yt_dlp
 import threading
 
@@ -23,13 +18,11 @@ from SubProcesses import video_severity, audio_severity, Merging, VideoPredictio
     AgeNGenderEstimation, DomainPrediction, TranscribingNProcessing, AudioConversion, merged_severity, create_folder
 
 # from lib import predict
-
 currentPath = os.getcwd()
 openFilePath = os.path.join(currentPath, "test_images")
 placeHolderImagePath = r"placeholder.jpg"
 data = []
 default_model = "model_3"
-
 
 
 def pickImage():
@@ -56,9 +49,6 @@ def pickImage():
 
 
 def Download(link):
-    # youtubeObject = YouTube(link, use_oauth=True, allow_oauth_cache=True)
-    # youtubeObject = youtubeObject.streams.get_highest_resolution()
-
     ydl_opts = {
         'format': 'best',
         'outtmpl': '%(title)s.%(ext)s',
@@ -74,7 +64,6 @@ def Download(link):
     run_path = "runs/run_" + str(run_number) + "/"
 
     try:
-        # youtubeObject.download(output_path=run_path)
         ydl_opts = {
             'format': 'best',
             'outtmpl': run_path + '%(title)s.%(ext)s',
@@ -138,18 +127,6 @@ def showImage():
     audio_df = TranscribingNProcessing(file_name, run_number, run_path)
     toggle_single_item(2)
 
-    sleep(50)
-    print("sleeping for 50 seconds")
-    print("sleeping for 50 seconds")
-    print("sleeping for 50 seconds")
-    print("sleeping for 50 seconds")
-    print("sleeping for 50 seconds")
-    print("sleeping for 50 seconds")
-    print("sleeping for 50 seconds")
-    print("sleeping for 50 seconds")
-    print("sleeping for 50 seconds")
-    print("sleeping for 50 seconds")
-
     audio_df = DomainPrediction(audio_df, run_path)
     toggle_single_item(3)
 
@@ -184,7 +161,6 @@ def showImage():
     #     print("file not exists")
     #     print("file not exists")
 
-
     if not video_df.empty:
         # show image in left side of the content
         agevsframes = Image.open(run_path + "Age vs Frames.png")
@@ -193,8 +169,6 @@ def showImage():
         img_1 = ImageTk.PhotoImage(agevsframes)
         panel_1 = tk.Label(left_subframe, image=img_1)
         panel_1.pack(side="bottom", fill="both", expand="yes")
-
-        # tksleep(3)
 
         # show image in left side of the content
         variationofemotionsinframes = Image.open(run_path + "Variation of Emotions in Frames.png")
@@ -222,7 +196,6 @@ def showImage():
         print("audio severity not done")
         audio_severity_done = False
 
-
     if not video_df.empty:
         video_severity_done = video_severity(run_path, video_df)
         if video_severity_done:
@@ -239,11 +212,11 @@ def showImage():
         print("merged severity not done")
         merged_severity_done = False
 
-
     ##################################### Finalizing #####################################
     if audio_severity_done:
         audio_df = pd.read_csv(run_path + "audio_predicted.csv")[['hate', 'severity']]
-        print("Mean of the audio hate: ", np.mean(audio_df['hate']), " - ", np.round(np.mean(audio_df['hate']) * 100, 2),
+        print("Mean of the audio hate: ", np.mean(audio_df['hate']), " - ",
+              np.round(np.mean(audio_df['hate']) * 100, 2),
               "%")
         print("Mean of the audio severity: ", np.mean(audio_df['severity']), " - ",
               np.round(np.mean(audio_df['severity']) * 25, 2), "%")
@@ -260,7 +233,6 @@ def showImage():
         video_severity_mean = np.round(np.mean(video_df['severity']) * 25, 2)
     else:
         video_severity_mean = "NaN"
-
 
     if audio_severity_done and video_severity_done and merged_severity_done:
         merged_df = pd.read_csv(run_path + "merged_predicted.csv")[['hate', 'severity']]
@@ -280,26 +252,33 @@ def showImage():
     bottom_frame_value_bg = 'white'
     bottom_frame_value_fg = 'black'
 
-    audio_hate_mean_label = Label(bottom_frame, text="Audio Hate", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
-    audio_hate_mean_label.grid(row=0, column=0, padx=bottom_frame_column_gap)
-    audio_hate_mean_title = Label(bottom_frame, text=audio_hate_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    audio_hate_mean_label = Label(bottom_frame, text="Audio Hate", font=bottom_frame_title_font,
+                                  bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    audio_hate_mean_label.grid(row=0, column=0, padx=bottom_frame_column_gap, pady=(20, 0))
+    audio_hate_mean_title = Label(bottom_frame, text=audio_hate_mean, font=bottom_frame_value_font,
+                                  bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
     audio_hate_mean_title.grid(row=1, column=0, padx=bottom_frame_column_gap)
 
-    audio_severity_mean_label_title = Label(bottom_frame, text="Audio Severity", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
-    audio_severity_mean_label_title.grid(row=0, column=1, padx=bottom_frame_column_gap)
-    audio_severity_mean_label = Label(bottom_frame, text=audio_severity_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    audio_severity_mean_label_title = Label(bottom_frame, text="Audio Severity", font=bottom_frame_title_font,
+                                            bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    audio_severity_mean_label_title.grid(row=0, column=1, padx=bottom_frame_column_gap, pady=(20, 0))
+    audio_severity_mean_label = Label(bottom_frame, text=audio_severity_mean, font=bottom_frame_value_font,
+                                      bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
     audio_severity_mean_label.grid(row=1, column=1, padx=bottom_frame_column_gap)
 
-    video_hate_mean_label_title = Label(bottom_frame, text="Video Severity", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
-    video_hate_mean_label_title.grid(row=0, column=2, padx=bottom_frame_column_gap)
-    video_hate_mean_label = Label(bottom_frame, text=video_severity_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    video_hate_mean_label_title = Label(bottom_frame, text="Video Severity", font=bottom_frame_title_font,
+                                        bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    video_hate_mean_label_title.grid(row=0, column=2, padx=bottom_frame_column_gap, pady=(20, 0))
+    video_hate_mean_label = Label(bottom_frame, text=video_severity_mean, font=bottom_frame_value_font,
+                                  bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
     video_hate_mean_label.grid(row=1, column=2, padx=bottom_frame_column_gap)
 
-    video_severity_mean_label_title = Label(bottom_frame, text="Video Severity", font=bottom_frame_title_font, bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
-    video_severity_mean_label_title.grid(row=0, column=3, padx=bottom_frame_column_gap)
-    merged_severity_mean_label = Label(bottom_frame, text=merged_severity_mean, font=bottom_frame_value_font, bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
+    video_severity_mean_label_title = Label(bottom_frame, text="Merged Severity", font=bottom_frame_title_font,
+                                            bg=bottom_frame_title_bg, fg=bottom_frame_title_fg)
+    video_severity_mean_label_title.grid(row=0, column=3, padx=bottom_frame_column_gap, pady=(20, 0))
+    merged_severity_mean_label = Label(bottom_frame, text=merged_severity_mean, font=bottom_frame_value_font,
+                                       bg=bottom_frame_value_bg, fg=bottom_frame_value_fg)
     merged_severity_mean_label.grid(row=1, column=3, padx=bottom_frame_column_gap)
-
 
     def download_audio_csv():
         # Open the CSV file with UTF-8 encoding
@@ -318,22 +297,20 @@ def showImage():
         csv_file_path = (run_path + "merged_df.csv")
         open_csv_files(csv_file_path)
 
-
-
     # add buttons to view the result in csv format (open csv supported external application) in a new frame
-    audio_download_button = tk.Button(download_frame, text="Download Audio CSV", command=download_audio_csv)
-    audio_download_button.grid(row=0, column=0, padx=bottom_frame_column_gap)
+    audio_download_button = tk.Button(download_frame, text="Download Audio CSV", command=download_audio_csv, bg='white')
+    audio_download_button.grid(row=0, column=0, padx=bottom_frame_column_gap, pady=(20, 0))
 
-    hate_sentiment_download_button = tk.Button(download_frame, text="Download Hate Sentiment CSV", command=download_hate_sentiment_csv)
-    hate_sentiment_download_button.grid(row=0, column=1, padx=bottom_frame_column_gap)
+    hate_sentiment_download_button = tk.Button(download_frame, text="Download Hate Sentiment CSV",
+                                               command=download_hate_sentiment_csv, bg='white')
+    hate_sentiment_download_button.grid(row=0, column=1, padx=bottom_frame_column_gap, pady=(20, 0))
 
-    video_download_button = tk.Button(download_frame, text="Download Video CSV", command=download_video_csv)
-    video_download_button.grid(row=0, column=2, padx=bottom_frame_column_gap)
+    video_download_button = tk.Button(download_frame, text="Download Video CSV", command=download_video_csv, bg='white')
+    video_download_button.grid(row=0, column=2, padx=bottom_frame_column_gap, pady=(20, 0))
 
-    merged_download_button = tk.Button(download_frame, text="Download Merged CSV", command=download_merged_csv)
-    merged_download_button.grid(row=0, column=3, padx=bottom_frame_column_gap)
-
-
+    merged_download_button = tk.Button(download_frame, text="Download Merged CSV", command=download_merged_csv,
+                                       bg='white')
+    merged_download_button.grid(row=0, column=3, padx=bottom_frame_column_gap, pady=(20, 0))
 
 
 # Function to run showImage in a separate thread
@@ -379,6 +356,8 @@ if __name__ == '__main__':
     # Create Object and setup root
     root = Tk()
     root.title("Youtube Hate Detection")
+    root.geometry("1200x700")
+    root.configure(background='white')
 
     # Create Frames
     top = Frame(root, width=1200, height=100, bg='white')
@@ -395,13 +374,13 @@ if __name__ == '__main__':
     left_subframe.pack(side=tk.LEFT)
 
     # Create the right subframe for code segment 1
-    right_subframe = tk.Frame(content, width=600, bg='blue')
+    right_subframe = tk.Frame(content, width=600, bg='white')
     right_subframe.pack(side=tk.RIGHT)
 
-    bottom_frame = tk.Frame(root, width=1200, bg='blue')
+    bottom_frame = tk.Frame(root, width=1200, bg='white')
     bottom_frame.pack(side=tk.TOP)
 
-    download_frame = tk.Frame(root, width=1200, bg='blue')
+    download_frame = tk.Frame(root, width=1200, bg='white')
     download_frame.pack(side=tk.TOP)
 
     # string variable with default value "model_1"
@@ -410,18 +389,6 @@ if __name__ == '__main__':
     url_text = StringVar()
     result_text_var = StringVar()
     predicted_var = StringVar()
-
-    # Audio conversion
-    # Transcribing and processing
-    # Domain prediction
-    # Age & Gender estimation
-    # Hate prediction
-    # Sentiment calculation
-    # Video prediction
-    # Merging
-    # Audio severity
-    # Video severity
-    # Merged severity
 
     # True or False for each step default False
     downloading_status = BooleanVar(value=False)
@@ -441,12 +408,12 @@ if __name__ == '__main__':
 
     """Top Section"""
     # create a label as title in center
-    lbl = tk.Label(top, text="Youtube Hate Detection", font=("Arial Bold", 36), fg='black')
+    lbl = tk.Label(top, text="Youtube Hate Detection", font=("Arial Bold", 36), fg='black', bg='white')
     lbl.grid()
 
     """Image Section"""
     # On right side of the image show a text input
-    lbl = tk.Label(middle, text="Input", font=("Arial Bold", 15), bg='blue')
+    lbl = tk.Label(middle, text="Input", font=("Arial Bold", 15), bg='white')
     lbl.place(x=80, y=40)
 
     # show input text box to enter youtube url right side of the label
@@ -455,16 +422,9 @@ if __name__ == '__main__':
 
     # Button right to text input to call main()
     btn = tk.Button(middle, text="Predict", command=run_showImage, font=("Arial Bold", 15), bg='white')
-    btn.place(x=800, y=40)
-
-    # # show textvariable value in label
-    # input_text = tk.Label(middle, textvariable=file_name, width=50, bg='white')
-    # input_text.place(x=80, y=100)
+    btn.place(x=800, y=35)
 
     """Content Section"""
-
-
-
     timeline_font_size = 12
     timeline_font = ("Arial Bold", timeline_font_size)
     timeline_tick_font_size = 12
@@ -523,7 +483,6 @@ if __name__ == '__main__':
     lbl_some_text = tk.Label(left_subframe, text="                                                        ",
                              font=("Arial Bold", 15), bg='white', anchor='w', justify='left')
     lbl_some_text.pack(padx=80, pady=0)
-
 
     root.mainloop()
 
